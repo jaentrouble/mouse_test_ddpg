@@ -20,15 +20,15 @@ env_kwargs = dict(
     hit_wall = 0,
 )
 
-hp.epsilon = 1
-hp.epsilon_min = 0.1
-hp.epsilon_nstep = 1500000
+model_f = am.mouse_eye_brain_model
+
+evaluate_f = tools.evaluate_mouse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
 parser.add_argument('-l', dest='load',default=False)
-parser.add_argument('--step', dest='total_steps',default=100000)
-parser.add_argument('--loop', dest='total_loop',default=20)
+parser.add_argument('--step', dest='loop_steps',default=100000)
+parser.add_argument('--loop', dest='total_loops',default=20)
 parser.add_argument('--curloop', dest='cur_loop',default=0)
 parser.add_argument('-n','--logname', dest='log_name',default=False)
 parser.add_argument('--curround', dest='cur_r',default=0)
@@ -37,15 +37,26 @@ parser.add_argument('-pf', dest='profile',action='store_true',default=False)
 args = parser.parse_args()
 
 vid_type = 'mp4'
-total_steps = int(args.total_steps)
-total_loop = int(args.total_loop)
+loop_steps = int(args.loop_steps)
+total_loops = int(args.total_loops)
 cur_loop = int(args.cur_loop)
 cur_r = int(args.cur_r)
 load_buffer = args.load_buffer
 
-my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
+# cur_loop starts from 0
+loops_left = total_loops - cur_loop -1
 
-print('starting loop, {} loops left'.format(total_loop))
+my_tqdm = tqdm(total=loop_steps, dynamic_ncols=True)
+
+hp.epsilon = 1
+hp.epsilon_min = 0.1
+hp.epsilon_nstep = (total_loops * loop_steps)//2
+
+hp.lr_start = 1e-5
+hp.lr_end = 1e-8
+hp.lr_nsteps = 1000000
+
+print(f'starting {cur_loop+1}/{total_loops} loop')
 if args.render :
     from gym.envs.classic_control.rendering import SimpleImageViewer
     eye_viewer = SimpleImageViewer(maxwidth=1500)
@@ -64,7 +75,7 @@ if args.load :
         tqdm= my_tqdm,
         m_dir= args.load, 
         log_name= args.log_name, 
-        start_step= cur_loop*total_steps, 
+        start_step= cur_loop*loop_steps, 
         start_round= cur_r, 
         load_buffer= load_buffer,
     )
@@ -111,7 +122,7 @@ if args.profile:
                 bef_o = aft_o
             if args.render :
                 env.render()
-    remaining_steps = total_steps - hp.Learn_start - 25
+    remaining_steps = loop_steps - hp.Learn_start - 25
     for step in range(remaining_steps):
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
@@ -124,7 +135,7 @@ if args.profile:
             env.render()
 
 else :
-    for step in range(total_steps):
+    for step in range(loop_steps):
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
         player.step(bef_o,action,r,d,i)
@@ -145,10 +156,9 @@ else:
 next_dir = os.path.join(save_dir,str(next_save))
 score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), vid_type)
 print('eval_score:{0}'.format(score))
-print('{0}steps took {1} sec'.format(total_steps,time.time()-st))
+print('{0}steps took {1} sec'.format(loop_steps,time.time()-st))
 
-total_loop -= 1
-if total_loop <= 0 :
+if loops_left <= 0 :
     sys.exit()
 else :
     next_args = []
@@ -157,9 +167,9 @@ else :
     next_args.append('-l')
     next_args.append(next_dir)
     next_args.append('--step')
-    next_args.append(str(total_steps))
+    next_args.append(str(loop_steps))
     next_args.append('--loop')
-    next_args.append(str(total_loop))
+    next_args.append(str(total_loops))
     next_args.append('--curloop')
     next_args.append(str(cur_loop+1))
     next_args.append('--logname')
