@@ -1,34 +1,27 @@
-# mouse_test_9
+# mouse_test_10
 
- DDQN
+ Long term training
 
 ## Purpose
 
-1. Try Double DQN and Dueling DQN. See if they help.
+1. Run a long training to see if how good the mouse can get
 
 ## Lessons from last experiment
 
-1. Even with the exact same condition, results may vary.
+1. Learning rate matters
 
-2. Always think of falling into local minima.
 
 ## TODO in this experiment
 
-1. Implement Double DQN
+1. Try some long training.
 
-2. Implement Dueling DQN
+2. If that works well, try with one apple too.
 
 ## Plan
 
-1. Try Double DQN first.
-
-2. Add Dueling DQN to see if it makes any difference.
+1. 10M training
 
 ## Other changes
-
-1. Changed some code so that the Player class is more generally usable.
-
-2. Now both CartPoleTest and SanityCheck uses the same Player class from Agent.
 
 ## Tests
 
