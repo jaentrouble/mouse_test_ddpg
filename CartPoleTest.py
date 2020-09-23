@@ -50,6 +50,7 @@ if args.render :
 st = time.time()
 
 env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
+eval_env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 bef_o = env.reset()
 
 if args.log_name:
@@ -99,8 +100,7 @@ if args.profile:
     for step in range(remaining_steps):
         if ((hp.Learn_start + 25 + step) % hp.Model_save) == 0 :
             player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
+            score = evaluate_f(player, eval_env, vid_type)
             print('eval_score:{0}'.format(score))
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
@@ -116,8 +116,7 @@ else :
     for step in range(total_steps):
         if (step>0) and ((step % hp.Model_save) == 0) :
             player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
+            score = evaluate_f(player, eval_env, vid_type)
             print('eval_score:{0}'.format(score))
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
@@ -130,8 +129,7 @@ else :
             env.render()
 
 player.save_model()
-score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                    vid_type)
+score = evaluate_f(player, eval_env, vid_type)
 print('eval_score:{0}'.format(score))
 d = timedelta(seconds=time.time() - st)
 print(f'{total_steps}steps took {d}')
