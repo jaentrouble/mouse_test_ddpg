@@ -83,3 +83,26 @@ def evaluate_common(player, env, video_type):
     print('Eval finished')
     env.close()
     return score
+
+class EnvWrapper():
+    """Change normal observation into dictionary type
+    {
+        'obs' : (actual observation)
+    }
+    """
+    def __init__(self, env):
+        self.env = env
+        from gym import spaces
+        self.observation_space = spaces.Dict(
+            'obs' : self.env.observation_space
+        )
+    
+    def __getattr__(self, attr):
+        return self.env.__getattribute__(attr)
+
+    def step(self, action):
+        o, r, d, i = self.env.step(action)
+        return {'obs':o}, r, d, i
+
+    def reset(self):
+        return {'obs':self.env.reset()}

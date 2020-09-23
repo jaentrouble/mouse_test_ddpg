@@ -49,7 +49,7 @@ if args.render :
 # For benchmark
 st = time.time()
 
-env = gym.make(ENVIRONMENT, **env_kwargs)
+env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 bef_o = env.reset()
 
 if args.log_name:
