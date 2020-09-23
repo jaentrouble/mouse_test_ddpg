@@ -94,7 +94,7 @@ class EnvWrapper():
         self.env = env
         from gym import spaces
         self.observation_space = spaces.Dict(
-            'obs' : self.env.observation_space
+            {'obs' : self.env.observation_space}
         )
     
     def __getattr__(self, attr):
