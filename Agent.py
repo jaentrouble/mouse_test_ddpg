@@ -152,23 +152,22 @@ class Player():
                 processed_obs[name] = tf.cast(obs, tf.float32)/255
         return processed_obs
 
+    @tf.function
     def choose_action(self, q):
         """
         Policy part; uses e-greedy
         """
-        if random.random() < self.epsilon:
-            return random.randrange(0, self.action_n)
+        if tf.random.uniform([]) < self.epsilon:
+            return tf.random.uniform([],0, self.action_n,dtype=tf.int64)
         else :
-            m = np.max(q[0])
-            indices = [i for i, x in enumerate(q[0]) if x==m]
-            return random.choice(indices)
+            return tf.argmax(q)
 
     def act(self, before_state, record=True):
         q = self._tf_q(before_state)
-        action = self.choose_action(q.numpy())
+        action = self.choose_action(q)
         if record:
             tf.summary.scalar('maxQ', tf.math.reduce_max(q), self.total_steps)
-        return action
+        return action.numpy()
         
 
     @tf.function
