@@ -160,7 +160,7 @@ class Player():
         if tf.random.uniform([]) < self.epsilon:
             return tf.random.uniform([],0, self.action_n,dtype=tf.int64)
         else :
-            return tf.argmax(q)
+            return tf.argmax(tf.squeeze(q))
 
     def act(self, before_state, record=True):
         q = self._tf_q(before_state)
