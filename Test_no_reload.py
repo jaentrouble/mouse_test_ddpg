@@ -16,7 +16,7 @@ from datetime import timedelta
 ENVIRONMENT = 'mouseCl-v2'
 
 env_kwargs = dict(
-    apple_num=10,
+    apple_num=1,
     eat_apple = 1.0,
     hit_wall = 0,
 )
@@ -39,7 +39,7 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
 hp.epsilon = 1
 hp.epsilon_min = 0.1
-hp.epsilon_nstep = total_steps//2
+hp.epsilon_nstep = total_steps//4
 
 hp.Model_save = 200000
 
