@@ -41,7 +41,7 @@ hp.epsilon = 1
 hp.epsilon_min = 0.1
 hp.epsilon_nstep = total_steps//4
 
-hp.Model_save = 200000
+hp.Model_save = 500000
 
 hp.lr_start = 1e-5
 hp.lr_end = 1e-10
