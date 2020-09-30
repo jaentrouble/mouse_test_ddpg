@@ -19,3 +19,4 @@ class Buf():
 Model_save = 200000
 
 histogram = 100000
+log_per_steps = 100
