@@ -99,10 +99,10 @@ class Player():
             self.log_name = datetime.now().strftime('%m_%d_%H_%M_%S')
         else:
             self.log_name = log_name
-        self.file_writer = tf.summary.create_file_writer(path.join('log',
+        self.file_writer = tf.summary.create_file_writer(path.join('logs',
                                                          self.log_name))
         self.file_writer.set_as_default()
-        print('Writing logs at '+ self.log_name)
+        print('Writing logs at logs/'+ self.log_name)
 
         # Scalars
         self.start_training = False

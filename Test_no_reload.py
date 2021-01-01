@@ -90,7 +90,7 @@ if args.profile:
         if args.render :
             env.render()
 
-    with Profile(f'log/{args.log_name}'):
+    with Profile(f'logs/{args.log_name}'):
         for step in range(5):
             action = player.act(bef_o)
             aft_o,r,d,i = env.step(action)
