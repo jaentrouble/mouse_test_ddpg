@@ -1,57 +1,34 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import critic_models as cm
+import encoder_models as em
+import actor_models as am
 """
+Actor-Critic agent model
+Agent functions return two models:
+    1. encoder_model
+        This takes observation only
+    2. actor_model
+        This takes encoded state only
+    3. critic_model
+        This takes encoded state and action together
+
 Every functions should take following two as inputs:
-
-observation_space
-action_space
+    1. observation_space
+    2. action_space : Box expected
 """
 
-def eye_model(inputs, left_or_right):
-    """
-    Return an eye model
-    Parameters
-    ----------
-    inputs : keras.Input
+def eye_brain_model(observation_space, action_space):
+    
+    encoder = em.encoder_two_eyes(observation_space)
+    encoded_state_shape = encoder.output.shape[1:]
 
-    left_or_right : str
-    """
-    x = layers.Reshape((inputs.shape[1],
-                        inputs.shape[2]*inputs.shape[3]))(inputs)
-    x = layers.Conv1D(64, 7, strides=1, activation='relu')(x)
-    x = layers.Conv1D(128, 5, strides=2, activation='relu')(x)
-    x = layers.Conv1D(192, 3, strides=2, activation='relu')(x)
-    outputs = layers.Conv1D(256, 3, strides=2, activation='relu')(x)
-    return keras.Model(inputs=inputs, outputs=outputs, 
-                name=left_or_right+'_eye')
+    actor = am.actor_simple_dense(encoded_state_shape, action_space)
+    
+    critic = cm.critic_simple_dense(encoded_state_shape, action_space)
 
-def brain_layers(action_n, x):
-    x = layers.Flatten()(x)
-    x = layers.Dense(256, activation='relu')(x)
-    x = layers.Dense(128, activation='relu')(x)
-    x = layers.Dense(64, activation='relu')(x)
-    outputs = layers.Dense(action_n)(x)
-    return outputs
-
-def mouse_eye_brain_model(observation_space, action_space):
-    right_input = keras.Input(observation_space['Right'].shape,
-                            name='Right')
-    left_input = keras.Input(observation_space['Left'].shape,
-                            name='Left')
-
-    right_eye_model = eye_model(right_input, 'right')
-    left_eye_model = eye_model(left_input, 'left')
-
-    right_encoded = right_eye_model(right_input)
-    left_encoded = left_eye_model(left_input)
-
-    concat = layers.Concatenate()([left_encoded, right_encoded])
-    outputs = brain_layers(action_space.n, concat)
-
-    model = keras.Model(inputs=[left_input, right_input], outputs=outputs)
-
-    return model
+    return encoder, actor, critic
 
 def cartpole_model(observation_space, action_space):
     inputs = keras.Input(observation_space['obs'].shape, name='obs')
@@ -65,3 +42,20 @@ def cartpole_model(observation_space, action_space):
     model = keras.Model(inputs=inputs, outputs=outputs)
 
     return model
+
+if __name__ == '__main__':
+    from gym.spaces import Dict, Box
+    import numpy as np
+    observation_space = Dict(
+        {'Right' : Box(0, 255, shape=(100,3,3), dtype=np.uint8),
+         'Left' : Box(0,255, shape=(100,3,3), dtype = np.uint8)}
+    )
+    action_space = Box(
+        low=np.array([-10.0,-np.pi]),
+        high=np.array([10.0,np.pi]),
+        dtype=np.float32
+    )
+    encoder, actor, critic = eye_brain_model(observation_space,action_space)
+    encoder.summary()
+    actor.summary()
+    critic.summary()
