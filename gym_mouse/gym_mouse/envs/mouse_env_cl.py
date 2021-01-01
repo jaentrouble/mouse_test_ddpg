@@ -26,8 +26,13 @@ class MouseEnv_cl(gym.Env) :
         hit_wall : float
             punishment(or reward?) given when hit wall. Default is 0
         """
-        #Turn left 45°, Move forward, Turn right 45°
-        self.action_space = Discrete(3)
+        # Speed [-10,10], Angle [-pi, pi]
+        # Spin first and move
+        self.action_space = Box(
+            low=np.array([-10.0,-np.pi]),
+            high=np.array([10.0,np.pi]),
+            dtype=np.float32
+        )
         self._done = False
         self.viewer = None
         self.engine = None
@@ -54,12 +59,8 @@ class MouseEnv_cl(gym.Env) :
         if self._done :
             print('The game is already done. Continuing may cause unexpected'\
                 ' behaviors')
-        if action == 0:
-            trans_action = ((0,0),np.pi/4)
-        elif action == 1:
-            trans_action = ((10,0),0)
-        elif action == 2:
-            trans_action = ((0,0),-np.pi/4)
+        trans_action = ((action[0],0),action[1])
+        
         observation, reward, done, info = self.engine.update(trans_action)
         if done:
             self._done = True
