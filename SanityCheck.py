@@ -28,12 +28,12 @@ hp.Batch_size = 32
 hp.Target_update = 10
 hp.Target_update_tau = 1e-2
 
-hp.lr_start=1e-4
-hp.lr_end = 1e-8
+hp.lr_start=1e-5
+hp.lr_end = 1e-10
 
 hp.OUP_stddev = 0.2
 hp.OUP_stddev_min = 0.05
-hp.OUP_stddev_nstep = 10000
+hp.OUP_stddev_nstep = 50000
 
 model_f = am.eye_brain_model
 
