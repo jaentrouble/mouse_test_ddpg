@@ -183,6 +183,12 @@ class Player():
         encoded_state = self.models['encoder'](processed_state)
         raw_action = self.models['actor'](encoded_state)
         action = self.oup_noise(raw_action)
+        action = tf.clip_by_value(
+            action,
+            self.action_space.low,
+            self.action_space.high,
+            name='clip_after_noise'
+        )
         return action
 
 
