@@ -19,7 +19,7 @@ if EYE:
     eye_bar = np.ones((5,3),dtype=np.uint8)*np.array([255,255,0],dtype=np.uint8)
 
 st = time.time()
-env = gym.make('mouseCl-v2', **env_kwargs)
+env = gym.make('mouseClCont-v0', **env_kwargs)
 env.seed(3)
 env.reset()
 # diff = 0
@@ -34,6 +34,9 @@ for _ in trange(100):
         eye_img = np.broadcast_to(eye_img.reshape((1,205,1,3)),(50,205,5,3))
         eye_img = eye_img.reshape(50,205*5,3)
         eye_viewer.imshow(eye_img)
+        env.render()
+        time.sleep(0.1)
+    else:
         env.render()
         time.sleep(0.1)
     if d :

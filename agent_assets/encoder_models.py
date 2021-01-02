@@ -30,9 +30,9 @@ def single_eye(inputs, left_or_right):
 
 def encoder_two_eyes(observation_space):
     right_input = keras.Input(observation_space['Right'].shape,
-                            name='Right_eye_input')
+                            name='Right')
     left_input = keras.Input(observation_space['Left'].shape,
-                            name='Left_eye_input')
+                            name='Left')
 
     right_encoded = single_eye(right_input, 'right')
     left_encoded = single_eye(left_input, 'left')
@@ -49,5 +49,20 @@ def encoder_two_eyes(observation_space):
         inputs=[right_input, left_input],
         outputs=outputs,
         name='encoder'
+    )
+    return model
+
+def encoder_simple_dense(observation_space):
+    inputs = keras.Input(observation_space['obs'].shape,
+                         name='obs')
+    x = layers.Flatten(name='encoder_flatten')(inputs)
+    x = layers.Dense(256, activation='relu',
+                         name='encoder_dense1')(x)
+    outputs = layers.Dense(256, activation='linear',
+                         name='encoder_dense2')(x)
+    model = keras.Model(
+        inputs=inputs,
+        outputs=outputs,
+        name='encoder',
     )
     return model

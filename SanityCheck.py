@@ -14,7 +14,7 @@ from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 from sanity_env import EnvTest
 
-ENVIRONMENT = 'mouseCl-v2'
+ENVIRONMENT = 'mouseClCont-v0'
 
 env_kwargs = dict(
     apple_num=10,

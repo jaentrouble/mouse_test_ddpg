@@ -13,7 +13,7 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseCl-v2'
+ENVIRONMENT = 'mouseClCont-v0'
 
 env_kwargs = dict(
     apple_num=1,

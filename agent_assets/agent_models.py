@@ -30,18 +30,15 @@ def eye_brain_model(observation_space, action_space):
 
     return encoder, actor, critic
 
-def cartpole_model(observation_space, action_space):
-    inputs = keras.Input(observation_space['obs'].shape, name='obs')
-    x = layers.Flatten()(inputs)
-    x = layers.Dense(512, activation='relu')(x)
-    x = layers.Dense(512, activation='relu')(x)
-    x = layers.Dense(512, activation='relu')(x)
-    x = layers.Dense(512, activation='relu')(x)
-    x = layers.Dense(256, activation='relu')(x)
-    outputs = layers.Dense(action_space.n)(x)
-    model = keras.Model(inputs=inputs, outputs=outputs)
+def mountaincar_model(observation_space, action_space):
+    encoder = em.encoder_simple_dense(observation_space)
+    encoded_state_shape = encoder.output.shape[1:]
 
-    return model
+    actor = am.actor_simple_dense(encoded_state_shape, action_space)
+
+    critic = cm.critic_simple_dense(encoded_state_shape, action_space)
+
+    return encoder, actor, critic
 
 if __name__ == '__main__':
     from gym.spaces import Dict, Box

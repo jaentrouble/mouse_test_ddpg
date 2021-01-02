@@ -24,7 +24,7 @@ vid_type = 'mp4'
 total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
-ENVIRONMENT = 'CartPole-v1'
+ENVIRONMENT = 'MountainCarContinuous-v0'
 
 env_kwargs = dict(
 )
