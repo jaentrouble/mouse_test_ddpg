@@ -225,7 +225,6 @@ class Player():
                     stddev=hp.OUP_stddev,
                 )*self.action_range
         self.last_oup = noise
-        
         return action + noise
 
     @tf.function
@@ -255,8 +254,11 @@ class Player():
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
             critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
-            if self.total_steps % hp.log_per_steps==0:
-                tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
+        if self.total_steps % hp.log_per_steps==0:
+            tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
+            tf.summary.scalar('q', tf.math.reduce_mean(q), self.total_steps)
+            tf.summary.scalar('a', a[0,0], self.total_steps)
+            
 
         encoder_vars = self.models['encoder'].trainable_weights
         critic_vars = self.models['critic'].trainable_weights

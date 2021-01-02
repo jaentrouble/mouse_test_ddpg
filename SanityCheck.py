@@ -25,12 +25,15 @@ env_kwargs = dict(
 hp.Buffer_size = 500
 hp.Learn_start = 200
 hp.Batch_size = 32
-hp.Target_update = 500
-hp.epsilon = 1
-hp.epsilon_min = 0.01
-hp.epsilon_nstep = 500
+hp.Target_update = 10
+hp.Target_update_tau = 1e-2
 
-model_f = am.mouse_eye_brain_model
+hp.lr_start=1e-2
+hp.lr_end = 1e-10
+
+hp.OUP_stddev = 0.1
+
+model_f = am.eye_brain_model
 
 evaluate_f = tools.evaluate_mouse
 
@@ -89,7 +92,7 @@ if args.profile:
         if args.render :
             env.render()
 
-    with Profile(f'log/{args.log_name}'):
+    with Profile(f'logs/{args.log_name}'):
         for step in range(5):
             action = player.act(bef_o)
             aft_o,r,d,i = env.step(action)
