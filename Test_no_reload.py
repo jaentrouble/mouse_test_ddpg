@@ -16,7 +16,7 @@ from datetime import timedelta
 ENVIRONMENT = 'mouseClCont-v0'
 
 env_kwargs = dict(
-    apple_num=1,
+    apple_num=10,
     eat_apple = 1.0,
     hit_wall = 0,
 )
