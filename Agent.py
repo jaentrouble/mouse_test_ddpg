@@ -243,10 +243,8 @@ class Player():
         # First update critic
         with tf.GradientTape() as critic_tape:
             encoded_o = self.models['encoder'](o, training=True)
-            with critic_tape.stop_recording():
-                action = self.models['actor'](encoded_o, training=False)
             q = self.models['critic'](
-                [action, encoded_o],
+                [a, encoded_o],
                 training=True,
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
