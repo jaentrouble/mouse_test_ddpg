@@ -33,12 +33,12 @@ model_f = am.mountaincar_model
 
 evaluate_f = tools.evaluate_common
 
-hp.Learn_start = 200
+hp.Learn_start = 2000
 hp.Target_update = 10
 hp.Target_update_tau = 1e-2
 
-hp.lr_start = 1e-5
-hp.lr_end = 1e-10
+hp.lr_start = 1e-3
+hp.lr_end = 1e-8
 hp.lr_nsteps = 500000
 
 # if args.render :
