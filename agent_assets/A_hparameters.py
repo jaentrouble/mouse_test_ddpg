@@ -11,6 +11,9 @@ lr_start = 0.001
 lr_end = 0.00005
 lr_nsteps = 2000000
 
+OUP_damping = 0.15
+OUP_stddev=0.2
+
 class Buf():
     alpha = 0.6
     beta = 0.4

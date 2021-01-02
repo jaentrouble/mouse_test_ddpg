@@ -25,9 +25,8 @@ class Player():
 
     Algorithms
     ----------
-    e-greedy
+    DDPG
     Prioritized sampling
-    Double DQN
     """
     def __init__(self, observation_space, action_space, model_f, tqdm, m_dir=None,
                  log_name=None, start_step=0, start_round=0,load_buffer=False):
@@ -40,7 +39,7 @@ class Player():
             Action space of the environment. Current agent expects only
             a discrete action space.
         model_f
-            A function to build the Q-model. 
+            A function that returns encoder, actor, critic models. 
             It should take obeservation space and action space as inputs.
             It should not compile the model.
         tqdm : tqdm.tqdm
@@ -64,25 +63,44 @@ class Player():
         print('Starting from round {}'.format(start_round))
         print('Load buffer? {}'.format(load_buffer))
         self.tqdm = tqdm
-        self.action_n = action_space.n
+        self.action_space = action_space
+        self.action_range = action_space.high - action_space.low
+        self.action_shape = action_space.shape
         self.observation_space = observation_space
+
+        # Ornstein-Uhlenbeck process
+        self.last_oup = 0
+
         #Inputs
         if m_dir is None :
-            self.model = model_f(observation_space, action_space)
+            encoder, actor, critic = model_f(observation_space, action_space)
+            self.models={
+                'encoder': encoder,
+                'actor' : actor,
+                'critic' : critic,
+            }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
-            self.model.compile(optimizer=optimizer)
+            for model in self.models.values():
+                model.compile(optimizer=optimizer)
         else:
-            # self.model = keras.models.load_model(m_dir)
-            self.model = model_f(observation_space, action_space)
+            encoder, actor, critic = model_f(observation_space, action_space)
+            self.models={
+                'encoder': encoder,
+                'actor' : actor,
+                'critic' : critic,
+            }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
-            self.model.compile(optimizer=optimizer)
-            self.model.load_weights(path.join(m_dir,'weights'))
+            for name, model in self.models.items():
+                model.compile(optimizer=optimizer)
+                model.load_weights(path.join(m_dir,name))
             print('model loaded')
-        self.t_model = keras.models.clone_model(self.model)
-        self.t_model.set_weights(self.model.get_weights())
-        self.model.summary()
+        self.t_models = {}
+        for name, model in self.models.items():
+            self.t_models[name] = keras.models.clone_model(model)
+            self.t_models[name].set_weights(model.get_weights())
+            model.summary()
 
         # Buffers
         if load_buffer:
@@ -156,55 +174,108 @@ class Player():
         return processed_obs
 
     @tf.function
-    def choose_action(self, q):
+    def choose_action(self, before_state):
         """
-        Policy part; uses e-greedy
+        Policy part
         """
-        if tf.random.uniform([]) < self.epsilon:
-            return tf.random.uniform([],0, self.action_n,dtype=tf.int64)
-        else :
-            return tf.argmax(tf.squeeze(q))
+        processed_state = self.pre_processing(before_state)
+        encoded_state = self.models['encoder'](processed_state)
+        raw_action = self.models['actor'](encoded_state)
+        action = self.oup_noise(raw_action)
+        return action
+
 
     def act(self, before_state, record=True):
-        q = self._tf_q(before_state)
-        action = self.choose_action(q)
+        action = self.choose_action(before_state)
         if record:
-            tf.summary.scalar('maxQ', tf.math.reduce_max(q), self.total_steps)
+            pass
         return action.numpy()
         
 
     @tf.function
-    def _tf_q(self, before_state):
-        processed_state = self.pre_processing(before_state)
-        q = self.model(processed_state, training=False)
-        return q
+    def oup_noise(self, action):
+        """
+        Add Ornstein-Uhlenbeck noise to action
+        """
+        noise = (1 - hp.OUP_damping)*self.last_oup + \
+                tf.random.normal(
+                    shape=self.action_shape, 
+                    mean=0.0,
+                    stddev=hp.OUP_stddev,
+                )*self.action_range
+        
+        return action + noise
 
     @tf.function
     def train_step(self, o, r, d, a, sp_batch, weights):
-        # next Q values from t_model to evaluate
-        target_q = self.t_model(sp_batch, training=False)
-        # next Q values from model to select action (Double DQN)
-        another_q = self.model(sp_batch, training=False)
-        idx = tf.math.argmax(another_q, axis=-1)
-        # Then retrieve the q value from target network
-        selected_q = tf.gather(target_q, idx, batch_dims=1)
+        """
+        All inputs are expected to be preprocessed
+        """
 
-        q_samp = r + tf.cast(tm.logical_not(d), tf.float32) * \
-                     hp.Q_discount * \
-                     selected_q
-        mask = tf.one_hot(a, self.action_n, dtype=tf.float32)
-        with tf.GradientTape() as tape:
-            q = self.model(o, training=True)
-            q_sa = tf.math.reduce_sum(q*mask, axis=1)
-            unweighted_loss = tf.math.square(q_samp - q_sa)
-            loss = tf.math.reduce_mean(weights * unweighted_loss)
+        t_encoded_sp_batch = self.t_models['encoder'](sp_batch, training=False)
+        # next Q values from t_critic to evaluate
+        t_action = self.t_models['actor'](t_encoded_sp_batch, training=False)
+        target_q = self.t_models['critic'](
+            [t_action, t_encoded_sp_batch], 
+            training=False,
+        )
+
+        critic_target = r + tf.cast(tm.logical_not(d), tf.float32) * \
+                            hp.Q_discount * \
+                            target_q
+
+        # First update critic
+        with tf.GradientTape() as critic_tape:
+            encoded_o = self.models['encoder'](o, training=True)
+            with critic_tape.stop_recording():
+                action = self.models['actor'](encoded_o, training=False)
+            q = self.models['critic'](
+                [action, encoded_o],
+                training=True,
+            )
+            critic_unweighted_loss = tf.math.square(q - critic_target)
+            critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
             if self.total_steps % hp.log_per_steps==0:
-                tf.summary.scalar('Loss', loss, self.total_steps)
+                tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
 
-        priority = (tf.math.abs(q_samp - q_sa) + hp.Buf.epsilon)**hp.Buf.alpha
-        trainable_vars = self.model.trainable_variables
-        gradients = tape.gradient(loss, trainable_vars)
-        self.model.optimizer.apply_gradients(zip(gradients, trainable_vars))
+        encoder_vars = self.models['encoder'].trainable_variables
+        encoder_gradients_c = critic_tape.gradient(critic_loss, encoder_vars)
+
+        critic_vars = self.models['critic'].trainable_variables
+        critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
+
+        self.models['encoder'].optimizer.apply_gradients(
+            zip(encoder_gradients_c, encoder_vars)
+        )
+        self.models['critic'].optimizer.apply_gradients(
+            zip(critic_gradients, critic_vars)
+        )
+
+        # Then update actor
+        with tf.GradientTape() as actor_tape:
+            encoded_o = self.models['encoder'](o, training=True)
+            action = self.models['actor'](encoded_o, training=True)
+            q = self.models['critic'](
+                [action, encoded_o],
+                training=False,
+            )
+            # Actor needs to 'ascend' gradient
+            J = (-1.0) * tf.reduce_mean(q)
+
+        encoder_vars = self.models['encoder'].trainable_variables
+        encoder_gradients_a = actor_tape.gradient(J, encoder_vars)
+
+        actor_vars = self.models['actor'].trainable_variables
+        actor_gradients = actor_tape.gradient(J, actor_vars)
+
+        self.models['encoder'].optimizer.apply_gradients(
+            zip(encoder_gradients_a, encoder_vars)
+        )
+        self.models['actor'].optimizer.apply_gradients(
+            zip(actor_gradients, actor_vars)
+        )
+
+        priority = (tf.math.abs(q-critic_target)+hp.Buf.epsilon)**hp.Buf.alpha
         return priority
 
 
@@ -235,8 +306,9 @@ class Player():
             self.rounds += 1
 
         if self.total_steps % hp.histogram == 0:
-            for var in self.model.trainable_weights:
-                tf.summary.histogram(var.name, var, step=self.total_steps)
+            for model in self.models.values():
+                for var in model.trainable_weights:
+                    tf.summary.histogram(var.name, var, step=self.total_steps)
 
         if self.buffer.num_in_buffer < hp.Learn_start :
             self.tqdm.set_description(
@@ -282,8 +354,9 @@ class Player():
         self.model_dir = path.join(self.save_dir, str(self.save_count))
         if not path.exists(self.model_dir):
             makedirs(self.model_dir)
-        weight_dir = path.join(self.model_dir,'weights')
-        self.model.save_weights(weight_dir)
+        for name, model in self.models:
+            weight_dir = path.join(self.model_dir,name)
+            model.save_weights(weight_dir)
         with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
             pickle.dump(self.buffer, f)
 
