@@ -30,6 +30,7 @@ parser.add_argument('-r','--render', dest='render',action='store_true', default=
 parser.add_argument('--step', dest='total_steps',default=100000)
 parser.add_argument('-n','--logname', dest='log_name',default=False)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
+parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
 args = parser.parse_args()
 
 vid_type = 'mp4'
@@ -40,8 +41,8 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 500000
 hp.Learn_start = 20000
 
-hp.lr_start = 1e-5
-hp.lr_end = 1e-8
+hp.lr_start = args.lr
+hp.lr_end = hp.lr_start * 1e-5
 hp.lr_nsteps = 1000000
 
 
