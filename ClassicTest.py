@@ -24,7 +24,7 @@ vid_type = 'mp4'
 total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
-ENVIRONMENT = 'MountainCarContinuous-v0'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
 )
