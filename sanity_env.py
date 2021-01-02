@@ -30,7 +30,7 @@ class EnvTest(object):
         self.cur_state = 0
         self.num_iters = 0
         self.was_in_second = False
-        self.action_space = Box(0,1, shape=(5,), dtype=np.float32)
+        self.action_space = Box(0,5, shape=(1,), dtype=np.float32)
         self.observations = ObservationSpace(observation_space)
         self.observation_space = observation_space
         
@@ -43,7 +43,9 @@ class EnvTest(object):
         
 
     def step(self, action):
-        action = np.argmax(action)
+        action = np.floor(action[0],dtype=np.int)
+        if action == 5:
+            action = 4
         self.num_iters += 1
         if action < 4:   
             self.cur_state = action
