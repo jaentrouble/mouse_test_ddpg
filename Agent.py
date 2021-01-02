@@ -150,12 +150,12 @@ class Player():
 
     @property
     @tf.function
-    def epsilon(self):
-        if tf.greater(self.total_steps, hp.epsilon_nstep) :
-            return hp.epsilon_min
+    def oup_stddev(self):
+        if tf.greater(self.total_steps, hp.OUP_stddev_nstep) :
+            return hp.OUP_stddev_min
         else:
-            return tf.cast(hp.epsilon-(hp.epsilon-hp.epsilon_min)*\
-                (self.total_steps/hp.epsilon_nstep),dtype=tf.float32)
+            return tf.cast(hp.OUP_stddev-(hp.OUP_stddev-hp.OUP_stddev_min)*\
+                (self.total_steps/hp.OUP_stddev_nstep),dtype=tf.float32)
 
     @tf.function
     def pre_processing(self, observation:dict):
@@ -219,7 +219,7 @@ class Player():
                 tf.random.normal(
                     shape=self.action_shape, 
                     mean=0.0,
-                    stddev=hp.OUP_stddev,
+                    stddev=self.oup_stddev,
                 )*self.action_range
         self.last_oup = noise
         return action + noise
