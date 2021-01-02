@@ -32,9 +32,9 @@ def eye_brain_model(observation_space, action_space):
 def classic_model(observation_space, action_space):
     encoder_f = em.encoder_simple_dense
 
-    actor = am.actor_simple_dense(encoded_state_shape, action_space, encoder_f)
+    actor = am.actor_simple_dense(observation_space, action_space, encoder_f)
 
-    critic = cm.critic_simple_dense(encoded_state_shape,action_space,encoder_f)
+    critic = cm.critic_simple_dense(observation_space,action_space,encoder_f)
 
     return actor, critic
 
