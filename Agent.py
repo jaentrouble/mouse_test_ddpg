@@ -168,7 +168,7 @@ class Player():
             # If only one observation is given, reshape to [1,...]
             if len(observation[name].shape)==\
                 len(self.observation_space[name].shape):
-                processed_obs[name] = tf.cast(obs[np.newaxis,...],tf.float32)/255
+                processed_obs[name] = tf.cast(obs[tf.newaxis,...],tf.float32)/255
             else :
                 processed_obs[name] = tf.cast(obs, tf.float32)/255
         return processed_obs
@@ -185,12 +185,26 @@ class Player():
         return action
 
 
-    def act(self, before_state, record=True):
+    def act_batch(self, before_state, record=True):
         action = self.choose_action(before_state)
         if record:
             pass
         return action.numpy()
         
+    def act(self, before_state, record=True):
+        """
+        Will squeeze axis=0 if Batch_num = 1
+        If you don't want to squeeze, use act_batch()
+        """
+        action = self.choose_action(before_state)
+        if record:
+            pass
+        action_np = action.numpy()
+        if action_np.shape[0] == 1:
+            return action_np[0]
+        else:
+            return action_np
+
 
     @tf.function
     def oup_noise(self, action):
@@ -239,17 +253,17 @@ class Player():
             if self.total_steps % hp.log_per_steps==0:
                 tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
 
-        encoder_vars = self.models['encoder'].trainable_variables
-        encoder_gradients_c = critic_tape.gradient(critic_loss, encoder_vars)
+        encoder_vars = self.models['encoder'].trainable_weights
+        critic_vars = self.models['critic'].trainable_weights
+        critic_appended = encoder_vars + critic_vars
 
-        critic_vars = self.models['critic'].trainable_variables
-        critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
+        critic_gradients = critic_tape.gradient(critic_loss, critic_appended)
 
         self.models['encoder'].optimizer.apply_gradients(
-            zip(encoder_gradients_c, encoder_vars)
+            zip(critic_gradients[:len(encoder_vars)], encoder_vars)
         )
         self.models['critic'].optimizer.apply_gradients(
-            zip(critic_gradients, critic_vars)
+            zip(critic_gradients[len(encoder_vars):], critic_vars)
         )
 
         # Then update actor
@@ -263,17 +277,17 @@ class Player():
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(q)
 
-        encoder_vars = self.models['encoder'].trainable_variables
-        encoder_gradients_a = actor_tape.gradient(J, encoder_vars)
+        encoder_vars = self.models['encoder'].trainable_weights
+        actor_vars = self.models['actor'].trainable_weights
+        actor_appended = encoder_vars + actor_vars
 
-        actor_vars = self.models['actor'].trainable_variables
-        actor_gradients = actor_tape.gradient(J, actor_vars)
+        actor_gradients = actor_tape.gradient(J, actor_appended)
 
         self.models['encoder'].optimizer.apply_gradients(
-            zip(encoder_gradients_a, encoder_vars)
+            zip(actor_gradients[:len(encoder_vars)], encoder_vars)
         )
         self.models['actor'].optimizer.apply_gradients(
-            zip(actor_gradients, actor_vars)
+            zip(actor_gradients[len(encoder_vars):], actor_vars)
         )
 
         priority = (tf.math.abs(q-critic_target)+hp.Buf.epsilon)**hp.Buf.alpha
@@ -348,8 +362,11 @@ class Player():
                 ):
                     model_w = model.get_weights()
                     t_model_w = t_model.get_weights()
-                    new_w = hp.Target_update_tau * model_w + \
-                            (1-hp.Target_update_tau) * t_model_w
+                    new_w = []
+                    for mw, tw in zip(model_w, t_model_w):
+                        nw = hp.Target_update_tau * mw + \
+                             (1-hp.Target_update_tau) * tw
+                        new_w.append(nw)
                     t_model.set_weights(new_w)
 
         self.total_steps.assign_add(1)
@@ -363,7 +380,7 @@ class Player():
         self.model_dir = path.join(self.save_dir, str(self.save_count))
         if not path.exists(self.model_dir):
             makedirs(self.model_dir)
-        for name, model in self.models:
+        for name, model in self.models.items():
             weight_dir = path.join(self.model_dir,name)
             model.save_weights(weight_dir)
         with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :

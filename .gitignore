@@ -7,6 +7,7 @@ savefiles/
 
 # log files
 log/
+logs/
 
 # Tensorboard thing
 boardenv/

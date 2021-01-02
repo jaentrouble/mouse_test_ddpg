@@ -29,23 +29,22 @@ ENVIRONMENT = 'MountainCarContinuous-v0'
 env_kwargs = dict(
 )
 
-model_f = am.cartpole_model
+model_f = am.mountaincar_model
 
 evaluate_f = tools.evaluate_common
 
-hp.Learn_start = 1000
-hp.Target_update = 2000
+hp.Learn_start = 200
+hp.Target_update = 10
+hp.Target_update_tau = 1e-2
+
 hp.lr_start = 1e-5
 hp.lr_end = 1e-10
 hp.lr_nsteps = 500000
-hp.epsilon = 1
-hp.epsilon_min = 0.1
-hp.epsilon_nstep = total_steps//2
 
-if args.render :
-    from gym.envs.classic_control.rendering import SimpleImageViewer
-    eye_viewer = SimpleImageViewer(maxwidth=1500)
-    bar = np.ones((5,3),dtype=np.uint8)*np.array([255,255,0],dtype=np.uint8)
+# if args.render :
+#     from gym.envs.classic_control.rendering import SimpleImageViewer
+#     eye_viewer = SimpleImageViewer(maxwidth=1500)
+#     bar = np.ones((5,3),dtype=np.uint8)*np.array([255,255,0],dtype=np.uint8)
 # For benchmark
 st = time.time()
 
@@ -85,7 +84,7 @@ if args.profile:
         if args.render :
             env.render()
 
-    with Profile(f'log/{args.log_name}'):
+    with Profile(f'logs/{args.log_name}'):
         for step in range(5):
             action = player.act(bef_o)
             aft_o,r,d,i = env.step(action)

@@ -1,9 +1,9 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import critic_models as cm
-import encoder_models as em
-import actor_models as am
+from . import critic_models as cm
+from . import encoder_models as em
+from . import actor_models as am
 """
 Actor-Critic agent model
 Agent functions return two models:
