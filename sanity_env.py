@@ -44,7 +44,7 @@ class EnvTest(object):
 
     def step(self, action):
         assert(0 <= action <= 5)
-        action = np.floor(action[0]).astype(np.int)
+        action = np.floor(action[0]*10).astype(np.int) % 5
         if action == 5:
             action = 4
         self.num_iters += 1
