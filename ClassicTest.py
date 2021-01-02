@@ -18,13 +18,14 @@ parser.add_argument('-r','--render', dest='render',action='store_true', default=
 parser.add_argument('--step', dest='total_steps',default=100000)
 parser.add_argument('-n','--logname', dest='log_name',default=False)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
+parser.add_argument('-v', dest='env',required=True)
 args = parser.parse_args()
 
 vid_type = 'mp4'
 total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
-ENVIRONMENT = 'Pendulum-v0'
+ENVIRONMENT = args.env
 
 env_kwargs = dict(
 )
