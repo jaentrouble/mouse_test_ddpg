@@ -32,6 +32,8 @@ hp.lr_start=1e-4
 hp.lr_end = 1e-8
 
 hp.OUP_stddev = 0.2
+hp.OUP_stddev_min = 0.05
+hp.OUP_stddev_nstep = 10000
 
 model_f = am.eye_brain_model
 
