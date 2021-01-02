@@ -22,8 +22,8 @@ env_kwargs = dict(
     hit_wall = 0,
 )
 
-hp.Buffer_size = 500
-hp.Learn_start = 200
+hp.Buffer_size = 10000
+hp.Learn_start = 2000
 hp.Batch_size = 32
 hp.Target_update = 10
 hp.Target_update_tau = 1e-2
