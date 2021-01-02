@@ -28,8 +28,8 @@ hp.Batch_size = 32
 hp.Target_update = 10
 hp.Target_update_tau = 1e-2
 
-hp.lr_start=1e-2
-hp.lr_end = 1e-10
+hp.lr_start=1e-8
+hp.lr_end = 1e-13
 
 hp.OUP_stddev = 0.1
 
