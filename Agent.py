@@ -203,6 +203,7 @@ class Player():
                     mean=0.0,
                     stddev=hp.OUP_stddev,
                 )*self.action_range
+        self.last_oup = noise
         
         return action + noise
 
