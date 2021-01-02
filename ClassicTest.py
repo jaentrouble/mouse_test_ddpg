@@ -30,7 +30,7 @@ ENVIRONMENT = args.env
 env_kwargs = dict(
 )
 
-model_f = am.mountaincar_model
+model_f = am.classic_model
 
 evaluate_f = tools.evaluate_common
 

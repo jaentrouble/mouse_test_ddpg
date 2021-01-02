@@ -28,14 +28,13 @@ hp.Batch_size = 32
 hp.Target_update = 10
 hp.Target_update_tau = 1e-2
 
-hp.lr_start=1e-8
-hp.lr_end = 1e-13
+hp.lr_start=1e-4
+hp.lr_end = 1e-8
 
-hp.OUP_stddev = 0.1
+hp.OUP_stddev = 0.2
 
 model_f = am.eye_brain_model
 
-evaluate_f = tools.evaluate_mouse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
@@ -105,11 +104,6 @@ if args.profile:
                 env.render()
     remaining_steps = total_steps - hp.Learn_start - 25
     for step in range(remaining_steps):
-        if ((hp.Learn_start + 25 + step) % hp.Model_save) == 0 :
-            player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
-            print('eval_score:{0}'.format(score))
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
         player.step(bef_o,action,r,d,i)
@@ -122,11 +116,6 @@ if args.profile:
 
 else :
     for step in range(total_steps):
-        if (step>0) and ((step % hp.Model_save) == 0) :
-            player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
-            print('eval_score:{0}'.format(score))
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
         player.step(bef_o,action,r,d,i)

@@ -21,24 +21,22 @@ Every functions should take following two as inputs:
 
 def eye_brain_model(observation_space, action_space):
     
-    encoder = em.encoder_two_eyes(observation_space)
-    encoded_state_shape = encoder.output.shape[1:]
+    encoder_f = em.encoder_two_eyes
 
-    actor = am.actor_simple_dense(encoded_state_shape, action_space)
+    actor = am.actor_simple_dense(observation_space, action_space, encoder_f)
     
-    critic = cm.critic_simple_dense(encoded_state_shape, action_space)
+    critic = cm.critic_simple_dense(observation_space, action_space, encoder_f)
 
-    return encoder, actor, critic
+    return actor, critic
 
-def mountaincar_model(observation_space, action_space):
-    encoder = em.encoder_simple_dense(observation_space)
-    encoded_state_shape = encoder.output.shape[1:]
+def classic_model(observation_space, action_space):
+    encoder_f = em.encoder_simple_dense
 
-    actor = am.actor_simple_dense(encoded_state_shape, action_space)
+    actor = am.actor_simple_dense(encoded_state_shape, action_space, encoder_f)
 
-    critic = cm.critic_simple_dense(encoded_state_shape, action_space)
+    critic = cm.critic_simple_dense(encoded_state_shape,action_space,encoder_f)
 
-    return encoder, actor, critic
+    return actor, critic
 
 if __name__ == '__main__':
     from gym.spaces import Dict, Box

@@ -6,6 +6,9 @@ Encoder models encode states into a feature tensor.
 
 Encoder model functions should take a following argument:
     1. observation_space : Dict
+Encoder model functions should return:
+    1. output tensor
+    2. list of Inputs
 """
 
 def single_eye(inputs, left_or_right):
@@ -45,12 +48,7 @@ def encoder_two_eyes(observation_space):
     outputs = layers.Dense(256, activation='linear',
                      name='encoder_dense')(x)
 
-    model = keras.Model(
-        inputs=[right_input, left_input],
-        outputs=outputs,
-        name='encoder'
-    )
-    return model
+    return outputs, [right_input, left_input]
 
 def encoder_simple_dense(observation_space):
     inputs = keras.Input(observation_space['obs'].shape,
@@ -60,9 +58,4 @@ def encoder_simple_dense(observation_space):
                          name='encoder_dense1')(x)
     outputs = layers.Dense(256, activation='linear',
                          name='encoder_dense2')(x)
-    model = keras.Model(
-        inputs=inputs,
-        outputs=outputs,
-        name='encoder',
-    )
-    return model
+    return outputs, [inputs]

@@ -13,11 +13,11 @@ Critic model functions should take a following argument:
 """
 
 
-def critic_simple_dense(encoded_state_shape, action_space):
+def critic_simple_dense(observation_space, action_space, encoder_f):
     action_input = keras.Input(action_space.shape,
-                            name='Action_input')
-    encoded_state_input = keras.Input(encoded_state_shape)
-    s = layers.Flatten(name='critic_flatten_state')(encoded_state_input)
+                            name='action')
+    encoded_state, encoder_inputs = encoder_f(observation_space)
+    s = layers.Flatten(name='critic_flatten_state')(encoded_state)
     a = layers.Flatten(name='critic_flatten_action')(action_input)
 
     x = layers.Concatenate(name='critic_concat_action_state')([s,a])
@@ -33,7 +33,7 @@ def critic_simple_dense(encoded_state_shape, action_space):
     outputs = tf.squeeze(x, name='critic_squeeze')
 
     model = keras.Model(
-        inputs=[action_input, encoded_state_input], 
+        inputs=[action_input,] + encoder_inputs, 
         outputs=outputs,
         name='critic'
     )

@@ -11,9 +11,9 @@ Critic model functions should take a following argument:
     2. action_space : Box
 """
 
-def actor_simple_dense(encoded_state_shape, action_space):
-    encoded_state_input = keras.Input(encoded_state_shape)
-    s = layers.Flatten(name='actor_flatten_state')(encoded_state_input)
+def actor_simple_dense(observation_space, action_space, encoder_f):
+    encoded_state, encoder_inputs = encoder_f(observation_space)
+    s = layers.Flatten(name='actor_flatten_state')(encoded_state)
     action_shape = action_space.shape
     action_num = tf.math.reduce_prod(action_shape)
     action_range = action_space.high - action_space.low
@@ -31,7 +31,7 @@ def actor_simple_dense(encoded_state_shape, action_space):
     outputs = x*action_range + action_low
 
     model = keras.Model(
-        inputs=encoded_state_input,
+        inputs=encoder_inputs,
         outputs=outputs,
         name='actor'
     )

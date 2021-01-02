@@ -39,7 +39,7 @@ class Player():
             Action space of the environment. Current agent expects only
             a discrete action space.
         model_f
-            A function that returns encoder, actor, critic models. 
+            A function that returns actor, critic models. 
             It should take obeservation space and action space as inputs.
             It should not compile the model.
         tqdm : tqdm.tqdm
@@ -73,9 +73,8 @@ class Player():
 
         #Inputs
         if m_dir is None :
-            encoder, actor, critic = model_f(observation_space, action_space)
+            actor, critic = model_f(observation_space, action_space)
             self.models={
-                'encoder': encoder,
                 'actor' : actor,
                 'critic' : critic,
             }
@@ -84,9 +83,8 @@ class Player():
             for model in self.models.values():
                 model.compile(optimizer=optimizer)
         else:
-            encoder, actor, critic = model_f(observation_space, action_space)
+            actor, critic = model_f(observation_space, action_space)
             self.models={
-                'encoder': encoder,
                 'actor' : actor,
                 'critic' : critic,
             }
@@ -180,8 +178,7 @@ class Player():
         Policy part
         """
         processed_state = self.pre_processing(before_state)
-        encoded_state = self.models['encoder'](processed_state)
-        raw_action = self.models['actor'](encoded_state)
+        raw_action = self.models['actor'](processed_state)
         action = self.oup_noise(raw_action)
         action = tf.clip_by_value(
             action,
@@ -233,11 +230,13 @@ class Player():
         All inputs are expected to be preprocessed
         """
 
-        t_encoded_sp_batch = self.t_models['encoder'](sp_batch, training=False)
         # next Q values from t_critic to evaluate
-        t_action = self.t_models['actor'](t_encoded_sp_batch, training=False)
+        t_action = self.t_models['actor'](sp_batch, training=False)
+        # add action to input
+        t_critic_input = sp_batch.copy()
+        t_critic_input['action'] = t_action
         target_q = self.t_models['critic'](
-            [t_action, t_encoded_sp_batch], 
+            t_critic_input, 
             training=False,
         )
 
@@ -247,9 +246,11 @@ class Player():
 
         # First update critic
         with tf.GradientTape() as critic_tape:
-            encoded_o = self.models['encoder'](o, training=True)
+            # add action to input
+            critic_input = o.copy()
+            critic_input['action'] = a
             q = self.models['critic'](
-                [a, encoded_o],
+                critic_input,
                 training=True,
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
@@ -260,41 +261,32 @@ class Player():
             tf.summary.scalar('a', a[0,0], self.total_steps)
             
 
-        encoder_vars = self.models['encoder'].trainable_weights
         critic_vars = self.models['critic'].trainable_weights
-        critic_appended = encoder_vars + critic_vars
 
-        critic_gradients = critic_tape.gradient(critic_loss, critic_appended)
+        critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
 
-        self.models['encoder'].optimizer.apply_gradients(
-            zip(critic_gradients[:len(encoder_vars)], encoder_vars)
-        )
         self.models['critic'].optimizer.apply_gradients(
-            zip(critic_gradients[len(encoder_vars):], critic_vars)
+            zip(critic_gradients, critic_vars)
         )
 
         # Then update actor
         with tf.GradientTape() as actor_tape:
-            encoded_o = self.models['encoder'](o, training=True)
-            action = self.models['actor'](encoded_o, training=True)
+            action = self.models['actor'](o, training=True)
+            # change action
+            critic_input['action'] = action
             q = self.models['critic'](
-                [action, encoded_o],
+                critic_input,
                 training=False,
             )
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(q)
 
-        encoder_vars = self.models['encoder'].trainable_weights
         actor_vars = self.models['actor'].trainable_weights
-        actor_appended = encoder_vars + actor_vars
 
-        actor_gradients = actor_tape.gradient(J, actor_appended)
+        actor_gradients = actor_tape.gradient(J, actor_vars)
 
-        self.models['encoder'].optimizer.apply_gradients(
-            zip(actor_gradients[:len(encoder_vars)], encoder_vars)
-        )
         self.models['actor'].optimizer.apply_gradients(
-            zip(actor_gradients[len(encoder_vars):], actor_vars)
+            zip(actor_gradients, actor_vars)
         )
 
         priority = (tf.math.abs(q-critic_target)+hp.Buf.epsilon)**hp.Buf.alpha
