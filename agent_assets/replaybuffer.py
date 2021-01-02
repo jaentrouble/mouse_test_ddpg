@@ -7,7 +7,7 @@ class ReplayBuffer():
     
     """
 
-    def __init__(self, buffer_size, observation_space:dict):
+    def __init__(self, buffer_size, observation_space:dict, action_space):
         """
         Stores observation space in uint8 dtype
         """
@@ -17,7 +17,10 @@ class ReplayBuffer():
             shape = space.shape
             self.obs_buffer[name] = np.zeros([buffer_size]+list(shape),
                                             dtype=space.dtype)
-        self.action_buffer = np.zeros(buffer_size, dtype=np.int32)
+        self.action_buffer = np.zeros(
+            [buffer_size]+list(action_space.shape), 
+            dtype=action_space.dtype,
+        )
         self.reward_buffer = np.zeros(buffer_size, dtype=np.float32)
         self.done_buffer = np.zeros(buffer_size, dtype=np.bool)
         self.prior_tree = np.zeros(2*self.size - 1)

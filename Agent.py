@@ -110,7 +110,8 @@ class Player():
             print('loaded : {} filled in buffer'.format(self.buffer.num_in_buffer))
             print('Current buffer index : {}'.format(self.buffer.next_idx))
         else :
-            self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space)
+            self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
+                                       self.action_space)
 
         # File writer for tensorboard
         if log_name is None :
