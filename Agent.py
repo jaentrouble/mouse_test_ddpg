@@ -341,8 +341,16 @@ class Player():
             new_priors = self.train_step(*data).numpy()
             self.buffer.update_prior_batch(indices, new_priors)
 
-            if not self.total_steps % hp.Target_update:
-                self.t_model.set_weights(self.model.get_weights())
+            # Soft target update
+            if self.total_steps % hp.Target_update == 0:
+                for model, t_model in zip(
+                    self.models.values(),self.t_models.values()
+                ):
+                    model_w = model.get_weights()
+                    t_model_w = t_model.get_weights()
+                    new_w = hp.Target_update_tau * model_w + \
+                            (1-hp.Target_update_tau) * t_model_w
+                    t_model.set_weights(new_w)
 
         self.total_steps.assign_add(1)
         self.current_steps += 1
