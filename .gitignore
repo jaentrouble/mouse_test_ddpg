@@ -9,6 +9,9 @@ savefiles/
 log/
 logs/
 
+# unity builds
+builds/
+
 # Tensorboard thing
 boardenv/
 
