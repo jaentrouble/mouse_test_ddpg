@@ -11,6 +11,8 @@ logs/
 
 # unity builds
 builds/
+*.png
+*.mp4
 
 # Tensorboard thing
 boardenv/
