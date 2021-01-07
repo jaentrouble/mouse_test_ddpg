@@ -8,13 +8,14 @@ import imageio
 host = 'localhost'
 port = 7777
 count = 0
-start_time = time.time()
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((host, port))
     print('listening')
     s.listen()
     conn, addr = s.accept()
     print('connected')
+    start_time = time.time()
     with conn:
         while True:
             count +=1
