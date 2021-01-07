@@ -9,8 +9,6 @@ import numpy as np
 class MouseEnv_cl(gym.Env) :
     """MouseEnv_cl-v2
 
-    Now it does not calculate mouse - apple distance.
-    Instead, it can have multiple apples    
     """
     metadata = {
         'render.modes' : ['human','rgb']
