@@ -3,6 +3,7 @@ import time
 import numpy as np
 import json
 from matplotlib import pyplot as plt
+import imageio
 
 host = 'localhost'
 port = 7777
@@ -30,5 +31,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             conn.sendall(message.encode('utf-8'))
 
 image = image.reshape((80,80,4))[::-1,...,:3]
+imageio.imwrite('test.png',image)
 
 print(f'{count/(time.time()-start_time)} frames/sec')
