@@ -20,12 +20,14 @@ env.reset()
 # diff = 0
 # for _ in trange(100):
     # diff += env.check_step(env.action_space.sample())
-for _ in trange(100):
-    o, r, d, i = env.step(env.action_space.sample())
+for _ in trange(1000):
+    o, r, d, i = env.step(np.array([0.5,1]))
     writer.write(o['obs'][...,-3:])
     if d :
         env.reset()
     env.render()
+    if r > 0:
+        print(r)
 # print(diff)
 # input('done:')
 writer.release()
