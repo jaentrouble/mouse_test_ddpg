@@ -22,7 +22,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         while True:
             count +=1
             try:
-                data = conn.recv(51200)
+                data = conn.recv(131072)
             except ConnectionResetError:
                 break
             if not data:
@@ -37,6 +37,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             message = json.dumps({
                 'move' : np.random.random()*0.1,
                 'turn' : np.random.random()-0.5,
+                'reset' : True,
             })
             conn.sendall(message.encode('utf-8'))
 
