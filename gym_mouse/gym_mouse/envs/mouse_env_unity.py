@@ -4,13 +4,14 @@ from gym.utils import seeding
 import numpy as np
 import socket
 import json
+import sys
 
 # Observe (80*80*4)
 FRAME_BYTE = 25600
 # Render (192*192*4)
 RENDER_BYTE = 147456
-# Need to be big enough
-RECV_BYTE = 524288
+
+RECV_BYTE = 16384
 
 class MouseEnv_unity(gym.Env) :
     """MouseEnv_unity
@@ -156,10 +157,19 @@ class MouseEnv_unity(gym.Env) :
         """
         to_send_byte = json.dumps(to_send).encode('utf-8')
         self.conn.sendall(to_send_byte)
-        data = self.conn.recv(RECV_BYTE)
-        if not data:
+        recv_info = self.conn.recv(RECV_BYTE)
+        if not recv_info:
             raise ConnectionAbortedError
-        return data
+        recv_size = json.loads(recv_info.decode('utf-8'))['length']
+        print(recv_size,)
+        
+        all_data = []
+        for _ in range(recv_size//RECV_BYTE + (recv_size%RECV_BYTE>0)):
+            data = self.conn.recv(RECV_BYTE)
+            if not data:
+                raise ConnectionAbortedError
+            all_data.append(data)
+        return b''.join(all_data)
 
 
 # Testing
