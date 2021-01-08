@@ -160,7 +160,7 @@ class MouseEnv_unity(gym.Env) :
         recv_info = self.conn.recv(RECV_BYTE)
         if not recv_info:
             raise ConnectionAbortedError
-        recv_size = json.loads(recv_info.decode('utf-8'))['length']
+        recv_size = int(recv_info.decode('utf-8'))
         print(recv_size,)
         
         all_data = []
