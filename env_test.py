@@ -7,6 +7,7 @@ import cv2
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 writer = cv2.VideoWriter('unitytest.mp4',fourcc,60, (80,80))
+writer_ren = cv2.VideoWriter('unitytest_ren.mp4',fourcc,60, (192,192))
 
 env_kwargs = dict(
     ip='localhost',
@@ -25,9 +26,10 @@ for _ in trange(1000):
     writer.write(o['obs'][...,-3:])
     if d :
         env.reset()
-    env.render()
+    writer_ren.write(env.render('rgb')[...,::-1])
     if r > 0:
         print(r)
 # print(diff)
 # input('done:')
 writer.release()
+writer_ren.release()
