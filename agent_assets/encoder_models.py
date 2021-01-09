@@ -65,30 +65,38 @@ def encoder_simple_res(observation_space):
     inputs = keras.Input(observation_space['obs'].shape,
                          name='obs')
     x = layers.Conv2D(
-        64, 
+        32, 
         3, 
         padding='same',
         activation='relu',
         name='encoder_conv1'
     )(inputs)
-    x = res_block(x, 3, name='encoder_resblock1')
+    x = res_block(x, 2, name='encoder_resblock1')
     x = layers.Conv2D(
-        128,
+        64,
         3,
         padding='same',
         strides=2,
         activation='relu',
         name='encoder_bottleneck1'
     )(x)
-    x = res_block(x, 3, name='encoder_resblock2')
+    x = res_block(x, 2, name='encoder_resblock2')
+    x = layers.Conv2D(
+        128,
+        3,
+        padding='same',
+        strides=2,
+        activation='relu',
+        name='encoder_bottleneck2'
+    )(x)
+    x = res_block(x, 2, name='encoder_resblock3')
     x = layers.Conv2D(
         256,
         3,
         padding='same',
-        activation='relu',
-        name='encoder_bottleneck2'
+        strides=2,
+        name='encoder_bottleneck3'
     )(x)
-    x = res_block(x, 3, name='encoder_resblock3')
     outputs = layers.GlobalMaxPool2D(name='encoder_pool')(x)
     return outputs, [inputs]
 
