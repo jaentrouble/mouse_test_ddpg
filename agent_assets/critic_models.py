@@ -2,14 +2,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 """
-Critic models takes two inputs:
+Critic models takes three inputs:
     1. encoded states
     2. actions
 and returns an expected future reward (a single float).
 
-Critic model functions should take a following argument:
-    1. encoded_state_shape
+Critic model functions should take following arguments:
+    1. observation_space
     2. action_space : Box
+    3. encoder_f
 """
 
 
@@ -31,6 +32,8 @@ def critic_simple_dense(observation_space, action_space, encoder_f):
     x = layers.Dense(1, activation='linear',dtype='float32',
                            name='critic_dense4')(x)
     outputs = tf.squeeze(x, name='critic_squeeze')
+    outputs = layers.Activation('linear',dtype=tf.float32,
+                                name='critic_float32')(outputs)
 
     model = keras.Model(
         inputs=[action_input,] + encoder_inputs, 

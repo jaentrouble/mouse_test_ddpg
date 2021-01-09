@@ -13,17 +13,16 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseClCont-v0'
+ENVIRONMENT = 'mouseUnity-v0'
 
 env_kwargs = dict(
-    apple_num=10,
-    eat_apple = 1.0,
-    hit_wall = 0,
+    ip='localhost',
+    port = 7777,
 )
 
-model_f = am.eye_brain_model
+model_f = am.unity_res_model
 
-evaluate_f = tools.evaluate_mouse
+evaluate_f = tools.evaluate_unity
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
@@ -31,14 +30,17 @@ parser.add_argument('--step', dest='total_steps',default=100000)
 parser.add_argument('-n','--logname', dest='log_name',default=False)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
 parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
+parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
+                    action='store_true',default=False)
 args = parser.parse_args()
+
 
 vid_type = 'mp4'
 total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
 
-hp.Model_save = 500000
+hp.Model_save = 200000
 hp.Learn_start = 20000
 
 hp.lr_start = args.lr
@@ -49,9 +51,10 @@ hp.lr_nsteps = 1000000
 if args.render :
     from gym.envs.classic_control.rendering import SimpleImageViewer
     eye_viewer = SimpleImageViewer(maxwidth=1500)
-    bar = np.ones((5,3),dtype=np.uint8)*np.array([255,255,0],dtype=np.uint8)
 # For benchmark
 st = time.time()
+
+need_to_eval = False
 
 env = gym.make(ENVIRONMENT, **env_kwargs)
 bef_o = env.reset()
@@ -63,7 +66,8 @@ if args.log_name:
         action_space= env.action_space, 
         model_f= model_f,
         tqdm= my_tqdm,
-        log_name= args.log_name
+        log_name= args.log_name,
+        mixed_float=args.mixed_float,
     )
 else :
     player = Player(
@@ -71,6 +75,7 @@ else :
         action_space= env.action_space, 
         model_f= model_f,
         tqdm= my_tqdm,
+        mixed_float=args.mixed_float,
     )
 if args.render :
     env.render()
@@ -102,14 +107,17 @@ if args.profile:
     remaining_steps = total_steps - hp.Learn_start - 25
     for step in range(remaining_steps):
         if ((hp.Learn_start + 25 + step) % hp.Model_save) == 0 :
-            player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
-            print('eval_score:{0}'.format(score))
+            need_to_eval = True
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
         player.step(bef_o,action,r,d,i)
         if d :
+            if need_to_eval:
+                player.save_model()
+                score = evaluate_f(player, env, vid_type)
+                print('eval_score:{0}'.format(score))
+                need_to_eval = False
+
             bef_o = env.reset()
         else:
             bef_o = aft_o
@@ -119,14 +127,17 @@ if args.profile:
 else :
     for step in range(total_steps):
         if (step>0) and ((step % hp.Model_save) == 0) :
-            player.save_model()
-            score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                                vid_type)
-            print('eval_score:{0}'.format(score))
+            need_to_eval = True
         action = player.act(bef_o)
         aft_o,r,d,i = env.step(action)
         player.step(bef_o,action,r,d,i)
         if d :
+            if need_to_eval:
+                player.save_model()
+                score = evaluate_f(player, env, vid_type)
+                print('eval_score:{0}'.format(score))
+                need_to_eval = False
+
             bef_o = env.reset()
         else:
             bef_o = aft_o
@@ -134,8 +145,7 @@ else :
             env.render()
 
 player.save_model()
-score = evaluate_f(player, gym.make(ENVIRONMENT, **env_kwargs), 
-                    vid_type)
+score = evaluate_f(player, env, vid_type)
 print('eval_score:{0}'.format(score))
 d = timedelta(seconds=time.time() - st)
 print(f'{total_steps}steps took {d}')

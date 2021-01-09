@@ -12,6 +12,7 @@ from agent_assets.replaybuffer import ReplayBuffer
 from agent_assets.mousemodel import QModel
 import pickle
 from tqdm import tqdm
+from tensorflow.keras import mixed_precision
 
 #leave memory space for opencl
 gpus=tf.config.experimental.list_physical_devices('GPU')
@@ -29,7 +30,8 @@ class Player():
     Prioritized sampling
     """
     def __init__(self, observation_space, action_space, model_f, tqdm, m_dir=None,
-                 log_name=None, start_step=0, start_round=0,load_buffer=False):
+                 log_name=None, start_step=0, start_round=0,load_buffer=False,
+                 mixed_float=False):
         """
         Parameters
         ----------
@@ -54,6 +56,8 @@ class Player():
             Total round starts from start_round
         load_buffer : bool
             Whether to load the buffer from the model directory
+        mixed_float : bool
+            Whether or not to use mixed precision
         """
         # model : The actual training model
         # t_model : Fixed target model
@@ -62,11 +66,17 @@ class Player():
         print('Starting from step {}'.format(start_step))
         print('Starting from round {}'.format(start_round))
         print('Load buffer? {}'.format(load_buffer))
+        print(f'Use mixed float? {mixed_float}')
         self.tqdm = tqdm
         self.action_space = action_space
         self.action_range = action_space.high - action_space.low
         self.action_shape = action_space.shape
         self.observation_space = observation_space
+        self.mixed_float = mixed_float
+        if mixed_float:
+            policy = mixed_precision.Policy('mixed_float16')
+            mixed_precision.set_global_policy(policy)
+
 
         # Ornstein-Uhlenbeck process
         self.last_oup = 0
@@ -80,6 +90,10 @@ class Player():
             }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
+            if self.mixed_float:
+                optimizer = mixed_precision.LossScaleOptimizer(
+                    optimizer
+                )
             for model in self.models.values():
                 model.compile(optimizer=optimizer)
         else:
@@ -90,6 +104,10 @@ class Player():
             }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
+            if self.mixed_float:
+                optimizer = mixed_precision.LossScaleOptimizer(
+                    optimizer
+                )
             for name, model in self.models.items():
                 model.compile(optimizer=optimizer)
                 model.load_weights(path.join(m_dir,name))
@@ -178,7 +196,7 @@ class Player():
         Policy part
         """
         processed_state = self.pre_processing(before_state)
-        raw_action = self.models['actor'](processed_state)
+        raw_action = self.models['actor'](processed_state, training=False)
         action = self.oup_noise(raw_action)
         action = tf.clip_by_value(
             action,
@@ -188,21 +206,44 @@ class Player():
         )
         return action
 
+    @tf.function
+    def choose_action_no_noise(self, before_state):
+        """
+        Policy part
+        For evaluation; no noise is added
+        """
+        processed_state = self.pre_processing(before_state)
+        raw_action = self.models['actor'](processed_state, training=False)
+        action = raw_action
+        action = tf.clip_by_value(
+            action,
+            self.action_space.low,
+            self.action_space.high,
+            name='clip_without_noise'
+        )
+        return action
 
-    def act_batch(self, before_state, record=True):
-        action = self.choose_action(before_state)
-        if record:
-            pass
+    
+
+
+    def act_batch(self, before_state, evaluate=False):
+        if evaluate:
+            action = self.choose_action_no_noise(before_state)
+        else:
+            action = self.choose_action(before_state)
         return action.numpy()
         
-    def act(self, before_state, record=True):
+    def act(self, before_state, evaluate=False):
         """
         Will squeeze axis=0 if Batch_num = 1
         If you don't want to squeeze, use act_batch()
+        
+        If eval = True, noise is not added
         """
-        action = self.choose_action(before_state)
-        if record:
-            pass
+        if evaluate:
+            action = self.choose_action_no_noise(before_state)
+        else:
+            action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
             return action_np[0]
@@ -255,14 +296,24 @@ class Player():
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
             critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
+            critic_loss_original = critic_loss
+            if self.mixed_float:
+                critic_loss = self.models['critic'].optimizer.get_scaled_loss(
+                    critic_loss
+                )
         if self.total_steps % hp.log_per_steps==0:
-            tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
+            tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
             tf.summary.scalar('q', tf.math.reduce_mean(q), self.total_steps)
             
 
         critic_vars = self.models['critic'].trainable_weights
 
         critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
+        if self.mixed_float:
+            critic_gradients = \
+                self.models['critic'].optimizer.get_unscaled_gradients(
+                    critic_gradients
+                )
 
         self.models['critic'].optimizer.apply_gradients(
             zip(critic_gradients, critic_vars)
@@ -279,10 +330,17 @@ class Player():
             )
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(q)
+            if self.mixed_float:
+                J = self.models['actor'].optimizer.get_scaled_loss(J)
 
         actor_vars = self.models['actor'].trainable_weights
 
         actor_gradients = actor_tape.gradient(J, actor_vars)
+        if self.mixed_float:
+            actor_gradients = \
+                self.models['actor'].optimizer.get_unscaled_gradients(
+                    actor_gradients
+                )
 
         self.models['actor'].optimizer.apply_gradients(
             zip(actor_gradients, actor_vars)
@@ -374,6 +432,7 @@ class Player():
         """
         Saves the model and return next save file number
         """
+        print('saving model..')
         self.save_count += 1
         self.model_dir = path.join(self.save_dir, str(self.save_count))
         if not path.exists(self.model_dir):
@@ -381,8 +440,9 @@ class Player():
         for name, model in self.models.items():
             weight_dir = path.join(self.model_dir,name)
             model.save_weights(weight_dir)
-        with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
-            pickle.dump(self.buffer, f)
+        # print('saving buffer..')
+        # with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
+        #     pickle.dump(self.buffer, f)
 
         return self.save_count
 
