@@ -32,6 +32,8 @@ def critic_simple_dense(observation_space, action_space, encoder_f):
     x = layers.Dense(1, activation='linear',dtype='float32',
                            name='critic_dense4')(x)
     outputs = tf.squeeze(x, name='critic_squeeze')
+    outputs = layers.Activation('linear',dtype=tf.float32,
+                                name='critic_float32')(outputs)
 
     model = keras.Model(
         inputs=[action_input,] + encoder_inputs, 
