@@ -11,6 +11,7 @@ import argparse
 import os
 import sys
 from tensorflow.profiler.experimental import Profile
+from tensorflow.keras import mixed_precision
 from datetime import timedelta
 
 ENVIRONMENT = 'mouseUnity-v0'
@@ -30,7 +31,14 @@ parser.add_argument('--step', dest='total_steps',default=100000)
 parser.add_argument('-n','--logname', dest='log_name',default=False)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
 parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
+parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
+                    action='store_true',default=False)
 args = parser.parse_args()
+
+if mixed_float:
+    policy = mixed_precision.Policy('mixed_float16')
+    mixed_precision.set_global_policy(policy)
+
 
 vid_type = 'mp4'
 total_steps = int(args.total_steps)
