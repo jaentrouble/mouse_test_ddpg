@@ -273,12 +273,13 @@ class Player():
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
             critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
+            critic_loss_original = critic_loss
             if self.mixed_float:
                 critic_loss = self.models['critic'].optimizer.get_scaled_loss(
                     critic_loss
                 )
         if self.total_steps % hp.log_per_steps==0:
-            tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
+            tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
             tf.summary.scalar('q', tf.math.reduce_mean(q), self.total_steps)
             
 
