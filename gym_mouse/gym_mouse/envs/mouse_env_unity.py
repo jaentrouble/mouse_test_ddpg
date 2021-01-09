@@ -6,10 +6,12 @@ import socket
 import json
 import sys
 
-# Observe (80*80*4)
-FRAME_BYTE = 25600
-# Render (192*192*4)
-RENDER_BYTE = 147456
+# NOTE: (WIDTH, HEIGHT)
+FRAME_SIZE = (80,80)
+FRAME_BYTE = np.prod(FRAME_SIZE) * 4 #Channel 4
+RENDER_SIZE = (192,192)
+RENDER_BYTE = np.prod(RENDER_SIZE) * 4 #Channel 4
+
 
 RECV_BYTE = 16384
 
@@ -29,6 +31,7 @@ class MouseEnv_unity(gym.Env) :
         port : 
             port number to listen, default 7777
         """
+        self.render_size = RENDER_SIZE
         # Speed [-1.0,1.0], Angle(degrees) [-90.0, 90.0]
         # Spin first and move
         self.action_space = Box(
@@ -54,7 +57,8 @@ class MouseEnv_unity(gym.Env) :
 
         # 3 Continuous Inputs from both eyes
         self.observation_space = Dict(
-            {'obs' : Box(0, 255, shape=(80,80,9), dtype=np.uint8)}
+            {'obs' : Box(0, 255, shape=(FRAME_SIZE[1],FRAME_SIZE[0],9), 
+                                        dtype=np.uint8)}
         )
         
 
@@ -75,7 +79,9 @@ class MouseEnv_unity(gym.Env) :
 
         raw_image = np.frombuffer(data[:FRAME_BYTE],dtype=np.uint8)
         # unity renders from bottom to top
-        new_obs = raw_image.reshape((80,80,4))[::-1,...,:3]
+        new_obs = raw_image.reshape(
+            (FRAME_SIZE[1],FRAME_SIZE[0],4)
+        )[::-1,...,:3]
         self._obs_buffer.pop(0)
         self._obs_buffer.append(new_obs)
         observation = {
@@ -122,7 +128,9 @@ class MouseEnv_unity(gym.Env) :
 
         raw_image = np.frombuffer(data[:25600],dtype=np.uint8)
         # unity renders from bottom to top
-        new_obs = raw_image.reshape((80,80,4))[::-1,...,:3]
+        new_obs = raw_image.reshape(
+            (FRAME_SIZE[1],FRAME_SIZE[0],4)
+        )[::-1,...,:3]
 
         self._obs_buffer = [new_obs]*3
         initial_observation = {
@@ -138,7 +146,9 @@ class MouseEnv_unity(gym.Env) :
         data = self._send_and_receive(to_send)
         image_raw = np.frombuffer(data,dtype=np.uint8)
         # unity renders from bottom to top
-        image = image_raw.reshape((192,192,4))[::-1,...,:3]
+        image = image_raw.reshape(
+            (RENDER_SIZE[1],RENDER_SIZE[0],4)
+        )[::-1,...,:3]
         if 'human' in mode :
             from gym.envs.classic_control import rendering
             if self.viewer == None:

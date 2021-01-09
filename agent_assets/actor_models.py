@@ -6,9 +6,10 @@ Actor models takes one input:
     1. encoded states
 and returns an action.
 
-Critic model functions should take a following argument:
-    1. encoded_state_shape
+Critic model functions should take following arguments:
+    1. observation_space
     2. action_space : Box
+    3. encoder_f
 """
 
 def actor_simple_dense(observation_space, action_space, encoder_f):

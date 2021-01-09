@@ -2,14 +2,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 """
-Critic models takes two inputs:
+Critic models takes three inputs:
     1. encoded states
     2. actions
 and returns an expected future reward (a single float).
 
-Critic model functions should take a following argument:
-    1. encoded_state_shape
+Critic model functions should take following arguments:
+    1. observation_space
     2. action_space : Box
+    3. encoder_f
 """
 
 

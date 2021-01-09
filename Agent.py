@@ -374,6 +374,7 @@ class Player():
         """
         Saves the model and return next save file number
         """
+        print('saving model..')
         self.save_count += 1
         self.model_dir = path.join(self.save_dir, str(self.save_count))
         if not path.exists(self.model_dir):
@@ -381,8 +382,9 @@ class Player():
         for name, model in self.models.items():
             weight_dir = path.join(self.model_dir,name)
             model.save_weights(weight_dir)
-        with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
-            pickle.dump(self.buffer, f)
+        # print('saving buffer..')
+        # with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
+        #     pickle.dump(self.buffer, f)
 
         return self.save_count
 

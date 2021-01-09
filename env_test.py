@@ -24,9 +24,10 @@ env.reset()
 for _ in trange(1000):
     o, r, d, i = env.step(np.array([0.5,1]))
     writer.write(o['obs'][...,-1:-4:-1])
+    writer_ren.write(env.render('rgb')[...,::-1])
     if d :
         env.reset()
-    writer_ren.write(env.render('rgb')[...,::-1])
+    
     if r > 0:
         print(r)
 # print(diff)
