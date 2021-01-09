@@ -196,7 +196,7 @@ class Player():
         Policy part
         """
         processed_state = self.pre_processing(before_state)
-        raw_action = self.models['actor'](processed_state)
+        raw_action = self.models['actor'](processed_state, training=False)
         action = self.oup_noise(raw_action)
         action = tf.clip_by_value(
             action,
@@ -213,7 +213,7 @@ class Player():
         For evaluation; no noise is added
         """
         processed_state = self.pre_processing(before_state)
-        raw_action = self.models['actor'](processed_state)
+        raw_action = self.models['actor'](processed_state, training=False)
         action = raw_action
         action = tf.clip_by_value(
             action,
