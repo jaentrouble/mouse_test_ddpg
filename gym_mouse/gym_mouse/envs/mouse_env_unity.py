@@ -74,7 +74,8 @@ class MouseEnv_unity(gym.Env) :
         data = self._send_and_receive(to_send)
 
         raw_image = np.frombuffer(data[:FRAME_BYTE],dtype=np.uint8)
-        new_obs = raw_image.reshape((80,80,4))[...,:3]
+        # unity renders from bottom to top
+        new_obs = raw_image.reshape((80,80,4))[::-1,...,:3]
         self._obs_buffer.pop(0)
         self._obs_buffer.append(new_obs)
         observation = {
