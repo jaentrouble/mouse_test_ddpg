@@ -23,7 +23,7 @@ env.reset()
     # diff += env.check_step(env.action_space.sample())
 for _ in trange(1000):
     o, r, d, i = env.step(np.array([0.5,1]))
-    writer.write(o['obs'][...,-3:])
+    writer.write(o['obs'][...,-1:-4:-1])
     if d :
         env.reset()
     writer_ren.write(env.render('rgb')[...,::-1])
