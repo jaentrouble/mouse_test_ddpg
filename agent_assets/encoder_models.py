@@ -65,7 +65,7 @@ def encoder_simple_res(observation_space):
     inputs = keras.Input(observation_space['obs'].shape,
                          name='obs')
     x = layers.Conv2D(
-        16, 
+        64, 
         3, 
         padding='same',
         activation='relu',
@@ -73,7 +73,7 @@ def encoder_simple_res(observation_space):
     )(inputs)
     x = res_block(x, 3, name='encoder_resblock1')
     x = layers.Conv2D(
-        32,
+        128,
         3,
         padding='same',
         strides=2,
@@ -82,7 +82,7 @@ def encoder_simple_res(observation_space):
     )(x)
     x = res_block(x, 3, name='encoder_resblock2')
     x = layers.Conv2D(
-        64,
+        256,
         3,
         padding='same',
         activation='relu',
