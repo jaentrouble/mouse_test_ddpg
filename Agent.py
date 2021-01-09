@@ -12,6 +12,7 @@ from agent_assets.replaybuffer import ReplayBuffer
 from agent_assets.mousemodel import QModel
 import pickle
 from tqdm import tqdm
+from tensorflow.keras import mixed_precision
 
 #leave memory space for opencl
 gpus=tf.config.experimental.list_physical_devices('GPU')
@@ -29,7 +30,8 @@ class Player():
     Prioritized sampling
     """
     def __init__(self, observation_space, action_space, model_f, tqdm, m_dir=None,
-                 log_name=None, start_step=0, start_round=0,load_buffer=False):
+                 log_name=None, start_step=0, start_round=0,load_buffer=False,
+                 mixed_float=False):
         """
         Parameters
         ----------
@@ -54,6 +56,8 @@ class Player():
             Total round starts from start_round
         load_buffer : bool
             Whether to load the buffer from the model directory
+        mixed_float : bool
+            Whether or not to use mixed precision
         """
         # model : The actual training model
         # t_model : Fixed target model
@@ -62,11 +66,17 @@ class Player():
         print('Starting from step {}'.format(start_step))
         print('Starting from round {}'.format(start_round))
         print('Load buffer? {}'.format(load_buffer))
+        print(f'Use mixed float? {mixed_float}')
         self.tqdm = tqdm
         self.action_space = action_space
         self.action_range = action_space.high - action_space.low
         self.action_shape = action_space.shape
         self.observation_space = observation_space
+        self.mixed_float = mixed_float
+        if mixed_float:
+            policy = mixed_precision.Policy('mixed_float16')
+            mixed_precision.set_global_policy(policy)
+
 
         # Ornstein-Uhlenbeck process
         self.last_oup = 0
@@ -80,6 +90,10 @@ class Player():
             }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
+            if self.mixed_float:
+                optimizer = mixed_precision.LossScaleOptimizer(
+                    optimizer
+                )
             for model in self.models.values():
                 model.compile(optimizer=optimizer)
         else:
@@ -90,6 +104,10 @@ class Player():
             }
             # compile models
             optimizer = keras.optimizers.Adam(learning_rate=self._lr)
+            if self.mixed_float:
+                optimizer = mixed_precision.LossScaleOptimizer(
+                    optimizer
+                )
             for name, model in self.models.items():
                 model.compile(optimizer=optimizer)
                 model.load_weights(path.join(m_dir,name))
@@ -255,6 +273,10 @@ class Player():
             )
             critic_unweighted_loss = tf.math.square(q - critic_target)
             critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
+            if self.mixed_float:
+                critic_loss = self.models['critic'].optimizer.get_scaled_loss(
+                    critic_loss
+                )
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('Critic Loss', critic_loss, self.total_steps)
             tf.summary.scalar('q', tf.math.reduce_mean(q), self.total_steps)
@@ -263,6 +285,11 @@ class Player():
         critic_vars = self.models['critic'].trainable_weights
 
         critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
+        if self.mixed_float:
+            critic_gradients = \
+                self.models['critic'].optimizer.get_unscaled_gradients(
+                    critic_gradients
+                )
 
         self.models['critic'].optimizer.apply_gradients(
             zip(critic_gradients, critic_vars)
@@ -279,10 +306,17 @@ class Player():
             )
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(q)
+            if self.mixed_float:
+                J = self.models['actor'].optimizer.get_scaled_loss(J)
 
         actor_vars = self.models['actor'].trainable_weights
 
         actor_gradients = actor_tape.gradient(J, actor_vars)
+        if self.mixed_float:
+            actor_gradients = \
+                self.models['actor'].optimizer.get_unscaled_gradients(
+                    actor_gradients
+                )
 
         self.models['actor'].optimizer.apply_gradients(
             zip(actor_gradients, actor_vars)
