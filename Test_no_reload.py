@@ -66,7 +66,8 @@ if args.log_name:
         action_space= env.action_space, 
         model_f= model_f,
         tqdm= my_tqdm,
-        log_name= args.log_name
+        log_name= args.log_name,
+        mixed_float=args.mixed_float,
     )
 else :
     player = Player(
@@ -74,6 +75,7 @@ else :
         action_space= env.action_space, 
         model_f= model_f,
         tqdm= my_tqdm,
+        mixed_float=args.mixed_float,
     )
 if args.render :
     env.render()
