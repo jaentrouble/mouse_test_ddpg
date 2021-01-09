@@ -8,6 +8,7 @@ savefiles/
 # log files
 log/
 logs/
+log_backups/
 
 # unity builds
 builds/
