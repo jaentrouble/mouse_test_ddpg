@@ -120,7 +120,8 @@ class MouseEnv_unity(gym.Env) :
         data = self._send_and_receive(to_send)
 
         raw_image = np.frombuffer(data[:25600],dtype=np.uint8)
-        new_obs = raw_image.reshape((80,80,4))[...,:3]
+        # unity renders from bottom to top
+        new_obs = raw_image.reshape((80,80,4))[::-1,...,:3]
 
         self._obs_buffer = [new_obs]*3
         initial_observation = {
@@ -134,7 +135,9 @@ class MouseEnv_unity(gym.Env) :
             'render' : True,
         }
         data = self._send_and_receive(to_send)
-        image = np.frombuffer(data,dtype=np.uint8).reshape((192,192,4))[...,:3]
+        image_raw = np.frombuffer(data,dtype=np.uint8)
+        # unity renders from bottom to top
+        image = image_raw.reshape((192,192,4))[::-1,...,:3]
         if 'human' in mode :
             from gym.envs.classic_control import rendering
             if self.viewer == None:
