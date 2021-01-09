@@ -164,11 +164,13 @@ class MouseEnv_unity(gym.Env) :
         print(recv_size,)
         
         all_data = []
-        for _ in range(recv_size//RECV_BYTE + (recv_size%RECV_BYTE>0)):
+        received_bytes = 0
+        while received_bytes<recv_size:
             data = self.conn.recv(RECV_BYTE)
             if not data:
                 raise ConnectionAbortedError
             all_data.append(data)
+            received_bytes += len(data)
         return b''.join(all_data)
 
 
