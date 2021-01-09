@@ -27,7 +27,7 @@ def evaluate_unity(player, env, video_type):
         loop += 1
         if not loop % 100:
             print('Eval : {}step passed'.format(loop))
-        a = player.act(o, record=False)
+        a = player.act(o, evaluate=True)
         o,r,done,i = env.step(a)
         score += r
         #eye recording
@@ -64,7 +64,7 @@ def evaluate_common(player, env, video_type):
         loop += 1
         if loop % 100 == 0:
             print('Eval : {}step passed'.format(loop))
-        a = player.act(o, record=False)
+        a = player.act(o, evaluate=True)
         o,r,done,i = env.step(a)
         score += r
         # This will turn image 90 degrees, but it does not make any difference,

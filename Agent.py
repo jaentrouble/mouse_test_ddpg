@@ -206,21 +206,44 @@ class Player():
         )
         return action
 
+    @tf.function
+    def choose_action_no_noise(self, before_state):
+        """
+        Policy part
+        For evaluation; no noise is added
+        """
+        processed_state = self.pre_processing(before_state)
+        raw_action = self.models['actor'](processed_state)
+        action = raw_action
+        action = tf.clip_by_value(
+            action,
+            self.action_space.low,
+            self.action_space.high,
+            name='clip_without_noise'
+        )
+        return action
 
-    def act_batch(self, before_state, record=True):
-        action = self.choose_action(before_state)
-        if record:
-            pass
+    
+
+
+    def act_batch(self, before_state, evaluate=False):
+        if evaluate:
+            action = self.choose_action_no_noise(before_state)
+        else:
+            action = self.choose_action(before_state)
         return action.numpy()
         
-    def act(self, before_state, record=True):
+    def act(self, before_state, evaluate=False):
         """
         Will squeeze axis=0 if Batch_num = 1
         If you don't want to squeeze, use act_batch()
+        
+        If eval = True, noise is not added
         """
-        action = self.choose_action(before_state)
-        if record:
-            pass
+        if evaluate:
+            action = self.choose_action_no_noise(before_state)
+        else:
+            action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
             return action_np[0]
