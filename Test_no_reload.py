@@ -35,7 +35,7 @@ parser.add_argument('-mf','--mixedfloat', dest='mixed_float',
                     action='store_true',default=False)
 args = parser.parse_args()
 
-if mixed_float:
+if args.mixed_float:
     policy = mixed_precision.Policy('mixed_float16')
     mixed_precision.set_global_policy(policy)
 
