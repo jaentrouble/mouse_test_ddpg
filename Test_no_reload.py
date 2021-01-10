@@ -26,12 +26,13 @@ evaluate_f = tools.evaluate_unity
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
-parser.add_argument('--step', dest='total_steps',default=100000)
-parser.add_argument('-n','--logname', dest='log_name',default=False)
+parser.add_argument('--step', dest='total_steps',default=100000, type=int)
+parser.add_argument('-n','--logname', dest='log_name',default=None)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
 parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
 parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
                     action='store_true',default=False)
+parser.add_argument('-l','--load', dest='load', default=None)
 args = parser.parse_args()
 
 vid_type = 'mp4'
@@ -58,24 +59,16 @@ need_to_eval = False
 env = gym.make(ENVIRONMENT, **env_kwargs)
 bef_o = env.reset()
 
-if args.log_name:
-    # If log directory is explicitely selected
-    player = Player(
-        observation_space= env.observation_space, 
-        action_space= env.action_space, 
-        model_f= model_f,
-        tqdm= my_tqdm,
-        log_name= args.log_name,
-        mixed_float=args.mixed_float,
-    )
-else :
-    player = Player(
-        observation_space= env.observation_space,
-        action_space= env.action_space, 
-        model_f= model_f,
-        tqdm= my_tqdm,
-        mixed_float=args.mixed_float,
-    )
+player = Player(
+    observation_space= env.observation_space, 
+    action_space= env.action_space, 
+    model_f= model_f,
+    tqdm= my_tqdm,
+    m_dir=args.load,
+    log_name= args.log_name,
+    mixed_float=args.mixed_float,
+)
+
 if args.render :
     env.render()
 
