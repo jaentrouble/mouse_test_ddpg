@@ -30,8 +30,7 @@ class Player():
     Prioritized sampling
     """
     def __init__(self, observation_space, action_space, model_f, tqdm, m_dir=None,
-                 log_name=None, start_step=0, start_round=0,load_buffer=False,
-                 mixed_float=False):
+                 log_name=None, start_step=0, start_round=0, mixed_float=False):
         """
         Parameters
         ----------
@@ -58,8 +57,6 @@ class Player():
             Total step starts from start_step
         start_round : int
             Total round starts from start_round
-        load_buffer : bool
-            Whether to load the buffer from the model directory
         mixed_float : bool
             Whether or not to use mixed precision
         """
@@ -122,16 +119,8 @@ class Player():
             self.t_models[name].set_weights(model.get_weights())
             model.summary()
 
-        # Buffers
-        if load_buffer:
-            print('loading buffers...')
-            with open(path.join(m_dir,'buffer.bin'),'rb') as f :
-                self.buffer = pickle.load(f)
-            print('loaded : {} filled in buffer'.format(self.buffer.num_in_buffer))
-            print('Current buffer index : {}'.format(self.buffer.next_idx))
-        else :
-            self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
-                                       self.action_space)
+        self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
+                                    self.action_space)
 
         # File writer for tensorboard
         if log_name is None :
