@@ -43,8 +43,11 @@ hp.Model_save = 200000
 hp.Learn_start = 20000
 
 hp.lr_start = args.lr
-hp.lr_end = hp.lr_start * 1e-5
-hp.lr_nsteps = 1000000
+hp.lr_end = hp.lr_start * 1e-2
+hp.lr_nsteps = 250000
+
+hp.OUP_stddev_start = 0.05
+hp.OUP_stddev_end = 0.05
 
 
 if args.render :
