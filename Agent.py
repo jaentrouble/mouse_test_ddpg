@@ -183,9 +183,10 @@ class Player():
     @tf.function
     def oup_stddev(self):
         if tf.greater(self.total_steps, hp.OUP_stddev_nstep) :
-            return hp.OUP_stddev_min
+            return hp.OUP_stddev_end
         else:
-            return tf.cast(hp.OUP_stddev-(hp.OUP_stddev-hp.OUP_stddev_min)*\
+            return tf.cast(hp.OUP_stddev_start+\
+                (hp.OUP_stddev_end-hp.OUP_stddev_start)*\
                 (self.total_steps/hp.OUP_stddev_nstep),dtype=tf.float32)
 
     @tf.function
