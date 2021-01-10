@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-l','--load', dest='load', required=True,)
 parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
                     action='store_true',default=False)
-parser.add_argument('-n','--logname', dest='log_name',default=False)
+parser.add_argument('-n','--logname', dest='log_name',default=None)
 
 args = parser.parse_args()
 
