@@ -39,6 +39,7 @@ player = Player(
     tqdm= None,
     log_name= args.log_name,
     mixed_float=args.mixed_float,
+    m_dir=args.load,
 )
 
 score = evaluate_f(player, env, 'mp4')

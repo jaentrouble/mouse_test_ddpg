@@ -155,6 +155,7 @@ class Player():
         else:
             self.save_dir, self.save_count = path.split(m_dir)
             self.save_count = int(self.save_count)
+        self.model_dir = None
 
     @tf.function
     def _lr(self):

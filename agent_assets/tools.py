@@ -5,9 +5,14 @@ import numpy as np
 def evaluate_unity(player, env, video_type):
     print('Evaluating...')
     done = False
-    eye_dir = path.join(player.model_dir, 'eval_eye.{}'.format(video_type))
-    ren_dir = path.join(player.model_dir, 'eval_ren.{}'.format(video_type))
-    score_dir = path.join(player.model_dir, 'score.txt')
+    if player.model_dir is None:
+        eye_dir = path.join(player.save_dir,'eval',f'eval_eye.{video_type}')
+        ren_dir = path.join(player.save_dir,'eval',f'eval_ren.{video_type}')
+        score_dir = path.join(player.save_dir,'eval','score.txt')
+    else:
+        eye_dir = path.join(player.model_dir, 'eval_eye.{}'.format(video_type))
+        ren_dir = path.join(player.model_dir, 'eval_ren.{}'.format(video_type))
+        score_dir = path.join(player.model_dir, 'score.txt')
     if 'avi' in video_type :
         fcc = 'DIVX'
     elif 'mp4' in video_type:
