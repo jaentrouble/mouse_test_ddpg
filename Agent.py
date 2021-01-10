@@ -30,8 +30,7 @@ class Player():
     Prioritized sampling
     """
     def __init__(self, observation_space, action_space, model_f, tqdm, m_dir=None,
-                 log_name=None, start_step=0, start_round=0,load_buffer=False,
-                 mixed_float=False):
+                 log_name=None, start_step=0, start_round=0, mixed_float=False):
         """
         Parameters
         ----------
@@ -58,8 +57,6 @@ class Player():
             Total step starts from start_step
         start_round : int
             Total round starts from start_round
-        load_buffer : bool
-            Whether to load the buffer from the model directory
         mixed_float : bool
             Whether or not to use mixed precision
         """
@@ -69,7 +66,6 @@ class Player():
         print('Log name : {}'.format(log_name))
         print('Starting from step {}'.format(start_step))
         print('Starting from round {}'.format(start_round))
-        print('Load buffer? {}'.format(load_buffer))
         print(f'Use mixed float? {mixed_float}')
         self.tqdm = tqdm
         self.action_space = action_space
@@ -122,16 +118,8 @@ class Player():
             self.t_models[name].set_weights(model.get_weights())
             model.summary()
 
-        # Buffers
-        if load_buffer:
-            print('loading buffers...')
-            with open(path.join(m_dir,'buffer.bin'),'rb') as f :
-                self.buffer = pickle.load(f)
-            print('loaded : {} filled in buffer'.format(self.buffer.num_in_buffer))
-            print('Current buffer index : {}'.format(self.buffer.next_idx))
-        else :
-            self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
-                                       self.action_space)
+        self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
+                                    self.action_space)
 
         # File writer for tensorboard
         if log_name is None :
@@ -171,18 +159,22 @@ class Player():
         new_lr = hp.lr_start*\
             ((hp.lr_end/hp.lr_start)**\
                 (tf.cast(self.total_steps,tf.float32)/hp.lr_nsteps))
-        if tf.less(new_lr, 1e-35):
-            return 1e-35
+        if tf.greater(self.total_steps, hp.lr_nsteps):
+            return hp.lr_end
         else :
+            new_lr = hp.lr_start*\
+                ((hp.lr_end/hp.lr_start)**\
+                    (tf.cast(self.total_steps,tf.float32)/hp.lr_nsteps))
             return new_lr
 
     @property
     @tf.function
     def oup_stddev(self):
         if tf.greater(self.total_steps, hp.OUP_stddev_nstep) :
-            return hp.OUP_stddev_min
+            return hp.OUP_stddev_end
         else:
-            return tf.cast(hp.OUP_stddev-(hp.OUP_stddev-hp.OUP_stddev_min)*\
+            return tf.cast(hp.OUP_stddev_start+\
+                (hp.OUP_stddev_end-hp.OUP_stddev_start)*\
                 (self.total_steps/hp.OUP_stddev_nstep),dtype=tf.float32)
 
     @tf.function

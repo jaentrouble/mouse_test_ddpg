@@ -13,8 +13,8 @@ lr_end = 0.00005
 lr_nsteps = 2000000
 
 OUP_damping = 0.15
-OUP_stddev=0.2
-OUP_stddev_min = 0.05
+OUP_stddev_start=0.2
+OUP_stddev_end = 0.05
 OUP_stddev_nstep = 500000
 
 class Buf():
