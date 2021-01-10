@@ -49,7 +49,11 @@ class Player():
         m_dir : str
             A model directory to load the model if there's a model to load
         log_name : str
-            A name for log
+            A name for log. If not specified, will be set to current time.
+            - If m_dir is specified yet no log_name is given, it will continue
+            counting.
+            - If m_dir and log_name are both specified, it will load model from
+            m_dir, but will record as it is the first training.
         start_step : int
             Total step starts from start_step
         start_round : int
@@ -153,8 +157,14 @@ class Player():
                             self.log_name)
             self.save_count = 0
         else:
-            self.save_dir, self.save_count = path.split(m_dir)
-            self.save_count = int(self.save_count)
+            if log_name is None :
+                self.save_dir, self.save_count = path.split(m_dir)
+                self.save_count = int(self.save_count)
+            else:
+                self.save_dir = path.join('savefiles',
+                                        self.log_name)
+                self.save_count = 0
+        self.model_dir = None
 
     @tf.function
     def _lr(self):

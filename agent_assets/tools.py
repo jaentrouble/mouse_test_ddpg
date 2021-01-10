@@ -1,13 +1,20 @@
 import cv2
-from os import path
+from os import path, makedirs
 import numpy as np
 
 def evaluate_unity(player, env, video_type):
     print('Evaluating...')
     done = False
-    eye_dir = path.join(player.model_dir, 'eval_eye.{}'.format(video_type))
-    ren_dir = path.join(player.model_dir, 'eval_ren.{}'.format(video_type))
-    score_dir = path.join(player.model_dir, 'score.txt')
+    if player.model_dir is None:
+        eval_dir = path.join(player.save_dir,'eval')
+        if not path.exists(eval_dir):
+            makedirs(eval_dir)
+    else:
+        eval_dir = player.model_dir
+    eye_dir = path.join(eval_dir,f'eval_eye.{video_type}')
+    ren_dir = path.join(eval_dir,f'eval_ren.{video_type}')
+    score_dir = path.join(eval_dir,'score.txt')
+
     if 'avi' in video_type :
         fcc = 'DIVX'
     elif 'mp4' in video_type:
