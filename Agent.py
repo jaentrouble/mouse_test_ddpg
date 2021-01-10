@@ -66,7 +66,6 @@ class Player():
         print('Log name : {}'.format(log_name))
         print('Starting from step {}'.format(start_step))
         print('Starting from round {}'.format(start_round))
-        print('Load buffer? {}'.format(load_buffer))
         print(f'Use mixed float? {mixed_float}')
         self.tqdm = tqdm
         self.action_space = action_space
