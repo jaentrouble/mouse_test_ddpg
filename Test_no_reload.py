@@ -40,12 +40,12 @@ total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
 
-hp.Model_save = 100000
+hp.Model_save = 200000
 hp.Learn_start = 20000
 
-hp.lr_start = 1e-7
-hp.lr_end = hp.lr_start * 1e-2
-hp.lr_nsteps = 250000
+hp.lr_start = 1e-5
+hp.lr_end = 1e-10
+hp.lr_nsteps = 1000000
 
 
 if args.render :
