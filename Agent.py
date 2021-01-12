@@ -156,9 +156,6 @@ class Player():
 
     @tf.function
     def _lr(self):
-        new_lr = hp.lr_start*\
-            ((hp.lr_end/hp.lr_start)**\
-                (tf.cast(self.total_steps,tf.float32)/hp.lr_nsteps))
         if tf.greater(self.total_steps, hp.lr_nsteps):
             return hp.lr_end
         else :
