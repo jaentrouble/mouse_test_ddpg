@@ -44,7 +44,7 @@ hp.Model_save = 200000
 hp.Learn_start = 20000
 
 hp.lr_start = 1e-6
-hp.lr_end = hp.lr_start
+hp.lr_end = 1e-11
 hp.lr_nsteps = 1000000
 
 
