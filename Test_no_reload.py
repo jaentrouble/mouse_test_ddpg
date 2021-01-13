@@ -43,13 +43,13 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 200000
 hp.Learn_start = 20000
 
-hp.lr_start = 1e-8
-hp.lr_end = 1e-12
+hp.lr_start = 1e-6
+hp.lr_end = 1e-11
 hp.lr_nsteps = 1000000
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 1000000
+hp.OUP_stddev_nstep = 500000
 
 if args.render :
     from gym.envs.classic_control.rendering import SimpleImageViewer
