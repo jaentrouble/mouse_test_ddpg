@@ -359,7 +359,8 @@ class Player():
         #     self.score += 1
         self.cumreward += reward
         if self.total_steps % hp.log_per_steps==0:
-            tf.summary.scalar('lr', self._lr(),self.total_steps)
+            for name in self.models:
+                tf.summary.scalar(f'lr_{name}',self._lr(name),self.total_steps)
         if done:
             # tf.summary.scalar('Score', self.score, self.rounds)
             tf.summary.scalar('Reward', self.cumreward, self.rounds)
