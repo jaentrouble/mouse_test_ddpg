@@ -91,7 +91,7 @@ class Player():
             }
             # compile models
             for name, model in self.models.items():
-                lr = partial(self.lr, name)
+                lr = partial(self._lr, name)
                 optimizer = keras.optimizers.Adam(learning_rate=lr)
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
@@ -106,7 +106,7 @@ class Player():
             }
             # compile models
             for name, model in self.models.items():
-                lr = partial(self.lr, name)
+                lr = partial(self._lr, name)
                 optimizer = keras.optimizers.Adam(learning_rate=lr)
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
