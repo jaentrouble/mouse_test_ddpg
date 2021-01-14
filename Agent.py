@@ -158,7 +158,7 @@ class Player():
         self.model_dir = None
 
     def _lr(self, name):
-        if tf.greater(self.total_steps, hp.lr[name].nsteps):
+        if tf.greater(self.total_steps, int(hp.lr[name].nsteps)):
             return hp.lr[name].end
         else :
             new_lr = hp.lr[name].start*\
