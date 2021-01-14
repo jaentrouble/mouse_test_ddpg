@@ -51,8 +51,6 @@ hp.lr['critic'].start = 1e-5
 hp.lr['critic'].end = 1e-10
 hp.lr['critic'].nsteps = 1e6
 
-
-
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
 hp.OUP_stddev_nstep = 200000
