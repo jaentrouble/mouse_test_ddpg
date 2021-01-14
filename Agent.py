@@ -91,7 +91,7 @@ class Player():
             }
             # compile models
             for name, model in self.models.items():
-                lr = partial(self._lr, name)
+                lr = tf.function(partial(self._lr, name))
                 optimizer = keras.optimizers.Adam(learning_rate=lr)
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
@@ -106,7 +106,7 @@ class Player():
             }
             # compile models
             for name, model in self.models.items():
-                lr = partial(self._lr, name)
+                lr = tf.function(partial(self._lr, name))
                 optimizer = keras.optimizers.Adam(learning_rate=lr)
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
@@ -157,7 +157,6 @@ class Player():
                 self.save_count = 0
         self.model_dir = None
 
-    @tf.function
     def _lr(self, name):
         if tf.greater(self.total_steps, hp.lr[name].nsteps):
             return hp.lr[name].end
