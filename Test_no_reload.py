@@ -43,9 +43,9 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 20000
 
-hp.lr_start = 1e-6
-hp.lr_end = 1e-7
-hp.lr_nsteps = 200000
+hp.lr_start = 1e-5
+hp.lr_end = 1e-10
+hp.lr_nsteps = 1000000
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
