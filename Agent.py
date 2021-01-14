@@ -13,6 +13,7 @@ from agent_assets.mousemodel import QModel
 import pickle
 from tqdm import tqdm
 from tensorflow.keras import mixed_precision
+from functools import partial
 
 #leave memory space for opencl
 gpus=tf.config.experimental.list_physical_devices('GPU')
@@ -89,12 +90,13 @@ class Player():
                 'critic' : critic,
             }
             # compile models
-            optimizer = keras.optimizers.Adam(learning_rate=self._lr)
-            if self.mixed_float:
-                optimizer = mixed_precision.LossScaleOptimizer(
-                    optimizer
-                )
-            for model in self.models.values():
+            for name, model in self.models.items():
+                lr = partial(self.lr, name)
+                optimizer = keras.optimizers.Adam(learning_rate=lr)
+                if self.mixed_float:
+                    optimizer = mixed_precision.LossScaleOptimizer(
+                        optimizer
+                    )
                 model.compile(optimizer=optimizer)
         else:
             actor, critic = model_f(observation_space, action_space)
@@ -103,12 +105,13 @@ class Player():
                 'critic' : critic,
             }
             # compile models
-            optimizer = keras.optimizers.Adam(learning_rate=self._lr)
-            if self.mixed_float:
-                optimizer = mixed_precision.LossScaleOptimizer(
-                    optimizer
-                )
             for name, model in self.models.items():
+                lr = partial(self.lr, name)
+                optimizer = keras.optimizers.Adam(learning_rate=lr)
+                if self.mixed_float:
+                    optimizer = mixed_precision.LossScaleOptimizer(
+                        optimizer
+                    )
                 model.compile(optimizer=optimizer)
                 model.load_weights(path.join(m_dir,name))
             print('model loaded')
@@ -155,13 +158,13 @@ class Player():
         self.model_dir = None
 
     @tf.function
-    def _lr(self):
-        if tf.greater(self.total_steps, hp.lr_nsteps):
-            return hp.lr_end
+    def _lr(self, name):
+        if tf.greater(self.total_steps, hp.lr[name].nsteps):
+            return hp.lr[name].end
         else :
-            new_lr = hp.lr_start*\
-                ((hp.lr_end/hp.lr_start)**\
-                    (tf.cast(self.total_steps,tf.float32)/hp.lr_nsteps))
+            new_lr = hp.lr[name].start*\
+                ((hp.lr[name].end/hp.lr[name].start)**\
+                    (tf.cast(self.total_steps,tf.float32)/hp.lr[name].nsteps))
             return new_lr
 
     @property
