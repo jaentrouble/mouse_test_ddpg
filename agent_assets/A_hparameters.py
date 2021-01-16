@@ -8,9 +8,25 @@ Target_update_tau = 1e-1
 # epsilon_nstep = 500000
 Q_discount = 0.99
 Train_epoch = 1
-lr_start = 0.001
-lr_end = 0.00005
-lr_nsteps = 2000000
+
+class Lr():
+    def __init__(self):
+        self.start = None
+        self.end = None
+        self.nsteps = None
+
+lr = {
+    'actor' : Lr(),
+    'critic' : Lr(),
+}
+lr['actor'].start = 0.001
+lr['actor'].end = 0.00005
+lr['actor'].nsteps = 2000000
+
+lr['critic'].start = 0.001
+lr['critic'].end = 0.00005
+lr['critic'].nsteps = 2000000
+
 
 OUP_damping = 0.15
 OUP_stddev_start=0.2

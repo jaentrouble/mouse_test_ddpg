@@ -29,7 +29,7 @@ parser.add_argument('-r','--render', dest='render',action='store_true', default=
 parser.add_argument('--step', dest='total_steps',default=100000, type=int)
 parser.add_argument('-n','--logname', dest='log_name',default=None)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
-parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
+# parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
 parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
                     action='store_true',default=False)
 parser.add_argument('-l','--load', dest='load', default=None)
@@ -40,12 +40,20 @@ total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
 
-hp.Model_save = 200000
+hp.Model_save = 30000
 hp.Learn_start = 20000
 
-hp.lr_start = args.lr
-hp.lr_end = hp.lr_start * 1e-2
-hp.lr_nsteps = 1000000
+hp.lr['actor'].start = 1e-8
+hp.lr['actor'].end = 1e-8
+hp.lr['actor'].nsteps = 2.5e5
+
+hp.lr['critic'].start = 1e-7
+hp.lr['critic'].end = 1e-7
+hp.lr['critic'].nsteps = 2.5e5
+
+hp.OUP_stddev_start = 0.05
+hp.OUP_stddev_end = 0.05
+hp.OUP_stddev_nstep = 200000
 
 
 if args.render :
