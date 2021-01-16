@@ -71,7 +71,7 @@ class MouseEnv_unity(gym.Env) :
         action = np.clip(action,self.action_space.low, self.action_space.high)
 
         to_send = {
-            'move':float(action[0]*0.1),
+            'move':float(action[0])*0.3,
             'turn':float(action[1]),
             'reset':False,
         }
