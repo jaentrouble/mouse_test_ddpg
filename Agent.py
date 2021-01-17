@@ -401,7 +401,6 @@ class Player():
                 d_batch, 
                 a_batch, 
                 sp_batch, 
-                # tf_total_steps,
                 weights,
             )
 
