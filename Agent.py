@@ -355,25 +355,20 @@ class Player():
         self.buffer.store_step(before, action, reward, done)
         self.tqdm.update()
         # Record here, so that it won't record when evaluating
-        # if info['ate_apple']:
-        #     self.score += 1
         self.cumreward += reward
         if self.total_steps % hp.log_per_steps==0:
             for name in self.models:
                 tf.summary.scalar(f'lr_{name}',self._lr(name),self.total_steps)
         if done:
-            # tf.summary.scalar('Score', self.score, self.rounds)
             tf.summary.scalar('Reward', self.cumreward, self.rounds)
-            # tf.summary.scalar('Score_step', self.score, self.total_steps)
             tf.summary.scalar('Reward_step', self.cumreward, self.total_steps)
+            tf.summary.scalar('Steps_per_round',self.current_steps,self.rounds)
             info_dict = {
                 'Round':self.rounds,
                 'Steps':self.current_steps,
-                # 'Score':self.score,
                 'Reward':self.cumreward,
             }
             self.tqdm.set_postfix(info_dict)
-            # self.score = 0
             self.current_steps = 0
             self.cumreward = 0
             self.rounds += 1
