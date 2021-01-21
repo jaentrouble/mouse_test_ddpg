@@ -271,31 +271,48 @@ class Player():
         """
         All inputs are expected to be preprocessed
         """
+        batch_size = tf.shape(a)[0]
+        tau = tf.random_uniform([batch_size, hp.IQN_SUPPORT])
+        tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
         t_action = self.t_models['actor'](sp_batch, training=False)
-        # add action to input
+        # add action, tau to input
         t_critic_input = sp_batch.copy()
         t_critic_input['action'] = t_action
-        target_q = self.t_models['critic'](
+        t_critic_input['tau'] = tau
+        target_support = self.t_models['critic'](
             t_critic_input, 
             training=False,
         )
 
         critic_target = r + tf.cast(tm.logical_not(d), tf.float32) * \
                             hp.Q_discount * \
-                            target_q
+                            target_support
 
         # First update critic
         with tf.GradientTape() as critic_tape:
             # add action to input
             critic_input = o.copy()
             critic_input['action'] = a
-            q = self.models['critic'](
+            critic_input['tau'] = tau
+            support = self.models['critic'](
                 critic_input,
                 training=True,
             )
-            critic_unweighted_loss = tf.math.square(q - critic_target)
+            # Shape (batch, support, support)
+            huber_loss = keras.losses.huber(target_support[...,tf.newaxis],
+                                            support[:,tf.newaxis,:])
+            mask = (target_support[...,tf.newaxis] -\
+                          support[:,tf.newaxis,:]) >= 0.0
+            raw_loss = tf.where(
+                mask, tau * huber_loss, tau_inv * huber_loss
+            )
+            # Shape (batch,)
+            critic_unweighted_loss = tf.reduce_mean(
+                tf.reduce_sum(raw_loss, axis=-1),
+                axis=-1
+            )
             critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
             critic_loss_original = critic_loss
             if self.mixed_float:
@@ -325,10 +342,14 @@ class Player():
             action = self.models['actor'](o, training=True)
             # change action
             critic_input['action'] = action
-            q = self.models['critic'](
+            critic_input['tau'] = tau
+            # Shape (batch, support)
+            support = self.models['critic'](
                 critic_input,
                 training=False,
             )
+            # In IQN, q is mean of all supports
+            q = tf.reduce_mean(support, axis=-1)
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(q)
             if self.mixed_float:
