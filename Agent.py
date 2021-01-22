@@ -302,8 +302,8 @@ class Player():
                 training=True,
             )
             # Shape (batch, support, support)
+            # One more final axis, because huber reduces one final axis
             huber_loss = \
-                # One more final axis, because huber reduces one final axis
                 keras.losses.huber(critic_target[...,tf.newaxis,tf.newaxis],
                                    support[:,tf.newaxis,:,tf.newaxis])
             mask = (critic_target[...,tf.newaxis] -\
