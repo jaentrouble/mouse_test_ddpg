@@ -285,7 +285,7 @@ class Player():
             t_critic_input, 
             training=False,
         )
-
+        # Shape (batch, support)
         critic_target = r[...,tf.newaxis] + \
                         tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
                         hp.Q_discount * \
@@ -303,6 +303,7 @@ class Player():
             )
             # Shape (batch, support, support)
             huber_loss = \
+                # One more final axis, because huber reduces one final axis
                 keras.losses.huber(critic_target[...,tf.newaxis,tf.newaxis],
                                    support[:,tf.newaxis,:,tf.newaxis])
             mask = (critic_target[...,tf.newaxis] -\

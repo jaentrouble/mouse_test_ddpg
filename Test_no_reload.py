@@ -43,22 +43,21 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 100000
 
-hp.lr['actor'].start = 1e-6
-hp.lr['actor'].end = 1e-10
-hp.lr['actor'].nsteps = 1e6
+hp.lr['actor'].start = 1e-4
+hp.lr['actor'].end = 1e-6
+hp.lr['actor'].nsteps = 5e5
+hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-9
-hp.lr['critic'].nsteps = 1e6
+hp.lr['critic'].start = 1e-3
+hp.lr['critic'].end = 1e-5
+hp.lr['critic'].nsteps = 5e5
+hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
-hp.OUP_stddev_start = 0.05
+hp.OUP_stddev_start = 0.2
 hp.OUP_stddev_end = 0.05
-hp.OUP_stddev_nstep = 200000
+hp.OUP_stddev_nstep = 2e5
+hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
-
-if args.render :
-    from gym.envs.classic_control.rendering import SimpleImageViewer
-    eye_viewer = SimpleImageViewer(maxwidth=1500)
 # For benchmark
 st = time.time()
 
