@@ -20,7 +20,7 @@ env_kwargs = dict(
     port = 7777,
 )
 
-model_f = am.unity_res_model
+model_f = am.unity_res_iqn
 
 evaluate_f = tools.evaluate_unity
 
