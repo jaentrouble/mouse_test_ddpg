@@ -47,6 +47,15 @@ def unity_res_model(observation_space, action_space):
 
     return actor, critic
     
+def unity_res_iqn(observation_space, action_space):
+    encoder_f = em.encoder_simple_res
+
+    actor = am.actor_simple_dense(observation_space, action_space, encoder_f)
+
+    critic = cm.critic_dense_iqn(observation_space, action_space, encoder_f)
+
+    return actor, critic
+
 if __name__ == '__main__':
     from gym.spaces import Dict, Box
     import numpy as np

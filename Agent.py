@@ -272,7 +272,7 @@ class Player():
         All inputs are expected to be preprocessed
         """
         batch_size = tf.shape(a)[0]
-        tau = tf.random_uniform([batch_size, hp.IQN_SUPPORT])
+        tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
         tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
@@ -286,9 +286,10 @@ class Player():
             training=False,
         )
 
-        critic_target = r + tf.cast(tm.logical_not(d), tf.float32) * \
-                            hp.Q_discount * \
-                            target_support
+        critic_target = r[...,tf.newaxis] + \
+                        tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
+                        hp.Q_discount * \
+                        target_support
 
         # First update critic
         with tf.GradientTape() as critic_tape:
@@ -301,12 +302,15 @@ class Player():
                 training=True,
             )
             # Shape (batch, support, support)
-            huber_loss = keras.losses.huber(target_support[...,tf.newaxis],
-                                            support[:,tf.newaxis,:])
-            mask = (target_support[...,tf.newaxis] -\
+            huber_loss = \
+                keras.losses.huber(critic_target[...,tf.newaxis,tf.newaxis],
+                                   support[:,tf.newaxis,:,tf.newaxis])
+            mask = (critic_target[...,tf.newaxis] -\
                           support[:,tf.newaxis,:]) >= 0.0
+            tau_expand = tau[:,tf.newaxis,:]
+            tau_inv_expand = tau_inv[:,tf.newaxis,:]
             raw_loss = tf.where(
-                mask, tau * huber_loss, tau_inv * huber_loss
+                mask, tau_expand * huber_loss, tau_inv_expand * huber_loss
             )
             # Shape (batch,)
             critic_unweighted_loss = tf.reduce_mean(
@@ -321,7 +325,7 @@ class Player():
                 )
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
-            tf.summary.scalar('q', tf.math.reduce_mean(q), self.total_steps)
+            tf.summary.scalar('q', tf.math.reduce_mean(support), self.total_steps)
             
 
         critic_vars = self.models['critic'].trainable_weights
@@ -368,7 +372,7 @@ class Player():
             zip(actor_gradients, actor_vars)
         )
 
-        priority = (tf.math.abs(q-critic_target)+hp.Buf.epsilon)**hp.Buf.alpha
+        priority = (critic_unweighted_loss+hp.Buf.epsilon)**hp.Buf.alpha
         return priority
 
 

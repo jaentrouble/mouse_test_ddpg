@@ -14,45 +14,44 @@ from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 from sanity_env import EnvTest
 
-ENVIRONMENT = 'mouseClCont-v0'
+parser = argparse.ArgumentParser()
+parser.add_argument('--step', dest='total_steps',default=100000)
+parser.add_argument('-n','--logname', dest='log_name',default=False)
+parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
+parser.add_argument('-pf', dest='profile',action='store_true',default=False)
+args = parser.parse_args()
+
+ENVIRONMENT = 'mouseUnity-v0'
 
 env_kwargs = dict(
-    apple_num=10,
-    eat_apple = 1.0,
-    hit_wall = 0,
+    ip='localhost',
+    port = 7777,
 )
 
 hp.Buffer_size = 10000
 hp.Learn_start = 2000
 hp.Batch_size = 32
-hp.Target_update = 10
-hp.Target_update_tau = 1e-2
 
-hp.lr_start=1e-5
-hp.lr_end = 1e-10
+hp.lr['actor'].start = 1e-6
+hp.lr['actor'].end = 1e-6
+hp.lr['actor'].nsteps = 1e6
 
-hp.OUP_stddev = 0.2
-hp.OUP_stddev_min = 0.05
-hp.OUP_stddev_nstep = 50000
+hp.lr['critic'].start = 1e-5
+hp.lr['critic'].end = 1e-5
+hp.lr['critic'].nsteps = 1e6
 
-model_f = am.eye_brain_model
+hp.OUP_stddev_start = 0.2
+hp.OUP_stddev_end = 0.05
+hp.OUP_stddev_nstep = 5000
+
+model_f = am.unity_res_iqn
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
-parser.add_argument('--step', dest='total_steps',default=100000)
-parser.add_argument('-n','--logname', dest='log_name',default=False)
-parser.add_argument('-pf', dest='profile',action='store_true',default=False)
-args = parser.parse_args()
 
 vid_type = 'mp4'
 total_steps = int(args.total_steps)
 my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
-if args.render :
-    from gym.envs.classic_control.rendering import SimpleImageViewer
-    eye_viewer = SimpleImageViewer(maxwidth=1500)
-    bar = np.ones((5,3),dtype=np.uint8)*np.array([255,255,0],dtype=np.uint8)
 # For benchmark
 st = time.time()
 

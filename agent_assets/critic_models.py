@@ -67,7 +67,7 @@ def critic_dense_iqn(observation_space, action_space, encoder_f):
     tau_input = keras.Input((hp.IQN_SUPPORT,), name='tau')
     # Shape (batch, support, 1)
     tau_reshape = tau_input[...,tf.newaxis]
-    pi_range = np.pi * tf.range(hp.IQN_COS_EMBED)
+    pi_range = np.pi * tf.range(hp.IQN_COS_EMBED, dtype=tf.float32)
     # Shape (batch, support, embed)
     tau_cos = tf.cos(tau_reshape * pi_range, name='tau_cos')
     # Shape (batch, support, 256)
