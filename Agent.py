@@ -198,9 +198,15 @@ class Player():
         """
         processed_state = self.pre_processing(before_state)
         raw_action = self.models['actor'](processed_state, training=False)
-        action = self.oup_noise(raw_action)
+        raw_action_clipped = tf.clip_by_value(
+            raw_action,
+            self.action_space.low,
+            self.action_space.high,
+            name='clip_before_noise'
+        )
+        noised_action = self.oup_noise(raw_action_clipped)
         action = tf.clip_by_value(
-            action,
+            noised_action,
             self.action_space.low,
             self.action_space.high,
             name='clip_after_noise'
