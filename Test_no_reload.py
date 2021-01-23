@@ -55,7 +55,7 @@ hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 2e5
+hp.OUP_stddev_nstep = 5e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
 # For benchmark
