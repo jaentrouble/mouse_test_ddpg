@@ -62,7 +62,6 @@ def evaluate_common(player, env, video_type):
     # Becareful : cv2 order of image size is (width, height)
     o = env.reset()
     rend_img = env.render('rgb_array')
-    # cv2 expects 90 degrees rotated
     out_shape = (rend_img.shape[1],rend_img.shape[0])
     out = cv2.VideoWriter(video_dir, fourcc, 10, out_shape)
     score = 0
@@ -74,8 +73,6 @@ def evaluate_common(player, env, video_type):
         a = player.act(o, evaluate=True)
         o,r,done,i = env.step(a)
         score += r
-        # This will turn image 90 degrees, but it does not make any difference,
-        # so keep it this way to save computations
         img = env.render('rgb_array')
         out.write(np.flip(env.render('rgb_array'), axis=-1))
     out.release()

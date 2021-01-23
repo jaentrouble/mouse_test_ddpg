@@ -13,16 +13,14 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseUnity-v0'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
-    ip='localhost',
-    port = 7777,
 )
 
-model_f = am.unity_res_iqn
+model_f = am.classic_iqn
 
-evaluate_f = tools.evaluate_unity
+evaluate_f = tools.evaluate_common
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
@@ -41,15 +39,15 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 
 
 hp.Model_save = 30000
-hp.Learn_start = 100000
+hp.Learn_start = 20000
 
-hp.lr['actor'].start = 1e-5
-hp.lr['actor'].end = 1e-7
+hp.lr['actor'].start = 1e-4
+hp.lr['actor'].end = 1e-4
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
-hp.lr['critic'].start = 1e-4
-hp.lr['critic'].end = 1e-6
+hp.lr['critic'].start = 1e-3
+hp.lr['critic'].end = 1e-3
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
@@ -63,7 +61,7 @@ st = time.time()
 
 need_to_eval = False
 
-env = gym.make(ENVIRONMENT, **env_kwargs)
+env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 bef_o = env.reset()
 
 player = Player(
