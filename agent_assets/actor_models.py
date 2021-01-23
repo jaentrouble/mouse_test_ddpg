@@ -26,8 +26,8 @@ def actor_simple_dense(observation_space, action_space, encoder_f):
                      name='actor_dense2')(x)
     x = layers.Dense(64, activation='relu',
                      name='actor_dense3')(x)
-    x = layers.Dense(action_num, activation='hard_sigmoid',dtype='float32',
-                           name='actor_dense4')(x)
+    x = layers.Dense(action_num, activation='linear',
+                     name='actor_dense4')(x)
     x = layers.Reshape(action_space.shape, name='actor_reshape')(x)
     outputs = x*action_range + action_low
     outputs = layers.Activation('linear',dtype='float32',
