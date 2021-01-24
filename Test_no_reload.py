@@ -43,7 +43,7 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 100000
 
-hp.lr['actor'].halt_steps = 1e5
+hp.lr['actor'].halt_steps = 2e4
 hp.lr['actor'].start = 1e-5
 hp.lr['actor'].end = 1e-7
 hp.lr['actor'].nsteps = 5e5
@@ -61,7 +61,7 @@ hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 5e5
+hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
 # For benchmark
