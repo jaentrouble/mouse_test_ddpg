@@ -18,7 +18,7 @@ def actor_simple_dense(observation_space, action_space, encoder_f):
     action_shape = action_space.shape
     action_num = tf.math.reduce_prod(action_shape)
     action_range = action_space.high - action_space.low
-    action_low = action_space.low
+    action_middle = (action_space.low + action_space.high)/2
 
     x = layers.Dense(256, activation='relu',
                      name='actor_dense1')(s)
@@ -30,7 +30,7 @@ def actor_simple_dense(observation_space, action_space, encoder_f):
                      name='actor_dense4',
                      kernel_initializer='zeros')(x)
     x = layers.Reshape(action_space.shape, name='actor_reshape')(x)
-    outputs = x*action_range + action_low
+    outputs = x*action_range + action_middle
     outputs = layers.Activation('linear',dtype='float32',
                                          name='actor_float32')(outputs)
 
