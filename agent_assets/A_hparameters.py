@@ -16,10 +16,12 @@ lr = {
     'actor' : Lr(),
     'critic' : Lr(),
 }
+lr['actor'].halt_steps = 0
 lr['actor'].start = 0.001
 lr['actor'].end = 0.00005
 lr['actor'].nsteps = 2000000
 
+lr['critic'].halt_steps = 0
 lr['critic'].start = 0.001
 lr['critic'].end = 0.00005
 lr['critic'].nsteps = 2000000

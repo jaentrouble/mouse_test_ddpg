@@ -160,6 +160,8 @@ class Player():
     def _lr(self, name):
         if tf.greater(self.total_steps, int(hp.lr[name].nsteps)):
             return hp.lr[name].end
+        elif tf.less(self.total_steps, int(hp.lr[name].halt_steps)):
+            return 0.0
         else :
             new_lr = hp.lr[name].start*\
                 ((hp.lr[name].end/hp.lr[name].start)**\
