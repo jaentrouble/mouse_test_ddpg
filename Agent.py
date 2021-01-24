@@ -158,14 +158,15 @@ class Player():
         self.model_dir = None
 
     def _lr(self, name):
-        if tf.greater(self.total_steps, int(hp.lr[name].nsteps)):
+        effective_steps = self.total_steps - hp.Learn_start
+        if tf.greater(effective_steps, int(hp.lr[name].nsteps)):
             return hp.lr[name].end
-        elif tf.less(self.total_steps, int(hp.lr[name].halt_steps)):
+        elif tf.less(effective_steps, int(hp.lr[name].halt_steps)):
             return 0.0
         else :
             new_lr = hp.lr[name].start*\
                 ((hp.lr[name].end/hp.lr[name].start)**\
-                    (tf.cast(self.total_steps,tf.float32)/hp.lr[name].nsteps))
+                    (tf.cast(effective_steps,tf.float32)/hp.lr[name].nsteps))
             return new_lr
 
     @property
