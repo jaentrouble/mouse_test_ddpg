@@ -257,8 +257,14 @@ class Player():
             action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0', action[0][0], self.total_steps)
+                tf.summary.scalar('a1', action[0][1], self.total_steps)
             return action_np[0]
         else:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0', action[0], self.total_steps)
+                tf.summary.scalar('a1', action[1], self.total_steps)
             return action_np
 
 
