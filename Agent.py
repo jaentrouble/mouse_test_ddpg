@@ -202,6 +202,8 @@ class Player():
         """
         processed_state = self.pre_processing(before_state)
         raw_action = self.models['actor'](processed_state, training=False)
+        tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
+        tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         raw_action_clipped = tf.clip_by_value(
             raw_action,
             self.action_space.low,
