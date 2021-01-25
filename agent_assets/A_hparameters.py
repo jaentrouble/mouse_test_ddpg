@@ -16,10 +16,12 @@ lr = {
     'actor' : Lr(),
     'critic' : Lr(),
 }
+lr['actor'].halt_steps = 0
 lr['actor'].start = 0.001
 lr['actor'].end = 0.00005
 lr['actor'].nsteps = 2000000
 
+lr['critic'].halt_steps = 0
 lr['critic'].start = 0.001
 lr['critic'].end = 0.00005
 lr['critic'].nsteps = 2000000
@@ -33,10 +35,13 @@ OUP_stddev_nstep = 500000
 IQN_SUPPORT = 64
 IQN_COS_EMBED = 64
 
-class Buf():
-    alpha = 0.6
-    beta = 0.4
-    epsilon = 1e-3
+class _Buf():
+    def __init__(self):
+        self.alpha = 0.6
+        self.beta = 0.4
+        self.epsilon = 1e-3
+
+Buf = _Buf()
 
 Model_save = 200000
 
