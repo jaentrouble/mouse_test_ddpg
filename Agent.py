@@ -198,20 +198,11 @@ class Player():
         """
         processed_state = self.pre_processing(before_state)
         raw_action = self.models['actor'](processed_state, training=False)
-        raw_action_clipped = tf.clip_by_value(
-            raw_action,
-            self.action_space.low,
-            self.action_space.high,
-            name='clip_before_noise'
-        )
-        noised_action = self.oup_noise(raw_action_clipped)
-        action = tf.clip_by_value(
-            noised_action,
-            self.action_space.low,
-            self.action_space.high,
-            name='clip_after_noise'
-        )
-        return action
+        if self.total_steps % hp.log_per_steps==0:
+            tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
+            tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
+        noised_action = self.oup_noise(raw_action)
+        return noised_action
 
     @tf.function
     def choose_action_no_noise(self, before_state):
@@ -222,12 +213,6 @@ class Player():
         processed_state = self.pre_processing(before_state)
         raw_action = self.models['actor'](processed_state, training=False)
         action = raw_action
-        action = tf.clip_by_value(
-            action,
-            self.action_space.low,
-            self.action_space.high,
-            name='clip_without_noise'
-        )
         return action
 
     
@@ -253,8 +238,14 @@ class Player():
             action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0', action[0][0], self.total_steps)
+                tf.summary.scalar('a1', action[0][1], self.total_steps)
             return action_np[0]
         else:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0', action[0], self.total_steps)
+                tf.summary.scalar('a1', action[1], self.total_steps)
             return action_np
 
 
