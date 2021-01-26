@@ -13,7 +13,7 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'Pendulum-v0'
+ENVIRONMENT = 'LunarLanderContinuous-v2'
 
 env_kwargs = dict(
 )
