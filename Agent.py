@@ -206,7 +206,7 @@ class Player():
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
             tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         noised_action = self.oup_noise(raw_action)
-        return action
+        return noised_action
 
     @tf.function
     def choose_action_no_noise(self, before_state):
