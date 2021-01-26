@@ -43,7 +43,7 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 20000
 
-hp.lr['actor'].halt_steps = 2e4
+hp.lr['actor'].halt_steps = 0
 hp.lr['actor'].start = 1e-7
 hp.lr['actor'].end = 1e-11
 hp.lr['actor'].nsteps = 1e6
