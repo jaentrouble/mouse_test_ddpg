@@ -18,18 +18,16 @@ parser.add_argument('-mf','--mixedfloat', dest='mixed_float',
 args = parser.parse_args()
 
 
-model_f = am.unity_res_model
+model_f = am.classic_iqn
 
-evaluate_f = tools.evaluate_unity
+evaluate_f = tools.evaluate_common
 
 env_kwargs = dict(
-    ip='localhost',
-    port = 7777,
 )
-
+ENVIRONMENT = 'Pendulum-v0'
 
 st = time.time()
-env = gym.make('mouseUnity-v0', **env_kwargs)
+env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 env.reset()
 player = Player(
     observation_space=env.observation_space,

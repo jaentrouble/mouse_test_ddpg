@@ -155,7 +155,7 @@ class Player():
                 self.save_dir = path.join('savefiles',
                                         self.log_name)
                 self.save_count = 0
-        self.model_dir = None
+        self.model_dir = path.join(self.save_dir, str(self.save_count))
 
     def _lr(self, name):
         if tf.greater(self.total_steps, int(hp.lr[name].nsteps)):
