@@ -59,7 +59,7 @@ hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
-hp.OUP_stddev_start = 0.2
+hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
