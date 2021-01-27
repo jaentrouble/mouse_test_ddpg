@@ -46,14 +46,14 @@ hp.lr['actor'].end = 1e-8
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-6
+hp.lr['critic'].start = 1e-7
+hp.lr['critic'].end = 1e-8
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
 hp.OUP_stddev_start = 0.5
 hp.OUP_stddev_end = 0.05
-hp.OUP_stddev_nstep = 2e5
+hp.OUP_stddev_nstep = 5e4
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
 # For benchmark
