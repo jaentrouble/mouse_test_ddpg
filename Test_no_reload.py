@@ -56,8 +56,6 @@ hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
-hp.Buf.alpha = 0.0
-
 # For benchmark
 st = time.time()
 

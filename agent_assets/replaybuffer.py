@@ -1,5 +1,4 @@
 import numpy as np
-import random
 import agent_assets.A_hparameters as hp
 
 class ReplayBuffer():
@@ -24,7 +23,6 @@ class ReplayBuffer():
         self.reward_buffer = np.zeros(buffer_size, dtype=np.float32)
         self.done_buffer = np.zeros(buffer_size, dtype=np.bool)
         self.prior_tree = np.zeros(2*self.size - 1)
-        self.max_prior = 1
         self.next_idx = 0
         self.num_in_buffer = 0
 
@@ -51,6 +49,15 @@ class ReplayBuffer():
         self.next_idx = (self.next_idx +1) % self.size
         self.num_in_buffer = min(self.size, self.num_in_buffer +1)
 
+    @property
+    def max_prior(self):
+        if self.num_in_buffer==0:
+            mp = 1.0
+        else:
+            mp = np.max(
+                self.prior_tree[self.size-1:self.size+self.num_in_buffer-1])
+        return mp
+
     def _to_tree_idx(self, idx):
         """Convert Data idx into tree idx"""
         return idx + self.size - 1
@@ -69,8 +76,6 @@ class ReplayBuffer():
         new_priority
             New priority to add
         """
-        if new_priority > self.max_prior:
-            self.max_prior = new_priority
         tree_idx = self._to_tree_idx(idx)
         delta = new_priority - self.prior_tree[tree_idx]
 
