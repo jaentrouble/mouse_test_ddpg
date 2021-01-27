@@ -1,5 +1,4 @@
 import numpy as np
-import random
 import agent_assets.A_hparameters as hp
 
 class ReplayBuffer():
