@@ -56,7 +56,7 @@ class ReplayBuffer():
             mp = 1.0
         else:
             mp = np.max(
-                self.prior_tree[self.size-1,self.size+self.num_in_buffer-1])
+                self.prior_tree[self.size-1:self.size+self.num_in_buffer-1])
         return mp
 
     def _to_tree_idx(self, idx):
