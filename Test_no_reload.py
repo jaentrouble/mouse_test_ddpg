@@ -13,7 +13,7 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'BipedalWalker-v2'
+ENVIRONMENT = 'BipedalWalker-v3'
 
 env_kwargs = dict(
 )
