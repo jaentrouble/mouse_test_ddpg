@@ -24,7 +24,7 @@ evaluate_f = tools.evaluate_common
 
 env_kwargs = dict(
 )
-ENVIRONMENT = 'Pendulum-v0'
+ENVIRONMENT = 'LunarLanderContinuous-v2'
 
 st = time.time()
 env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
@@ -38,4 +38,4 @@ player = Player(
     m_dir=args.load,
 )
 
-score = evaluate_f(player, env, 'mp4')
+score = evaluate_f(player, env, 'mp4', fps=30)
