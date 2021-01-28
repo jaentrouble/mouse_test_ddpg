@@ -47,7 +47,7 @@ def evaluate_unity(player, env, video_type):
     print('Eval finished')
     return score
 
-def evaluate_common(player, env, video_type):
+def evaluate_common(player, env, video_type, fps=10):
     print('Evaluating...')
     done = False
     video_dir = path.join(player.model_dir, 'eval.{}'.format(video_type))
@@ -63,7 +63,7 @@ def evaluate_common(player, env, video_type):
     o = env.reset()
     rend_img = env.render('rgb_array')
     out_shape = (rend_img.shape[1],rend_img.shape[0])
-    out = cv2.VideoWriter(video_dir, fourcc, 10, out_shape)
+    out = cv2.VideoWriter(video_dir, fourcc, fps, out_shape)
     score = 0
     loop = 0
     while not done :
