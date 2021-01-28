@@ -52,7 +52,7 @@ hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-4
+hp.lr['critic'].start = 1e-5
 hp.lr['critic'].end = 1e-6
 hp.lr['critic'].nsteps = 1e6
 
