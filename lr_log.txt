@@ -1,0 +1,8 @@
+actor - critc
+8 - 4 pre3
+8 - 5 pre3_2
+9 - 4 pre3_3
+7 - 4 pre3_4
+6 - 4 pre3_5
+6 - 5 pre3_6
+7 - 5 pre3_7
