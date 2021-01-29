@@ -13,7 +13,7 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'BipedalWalker-v3'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
 )
@@ -41,19 +41,19 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 20000
 
-hp.lr['actor'].start = 1e-8
-hp.lr['actor'].end = 1e-9
+hp.lr['actor'].start = 1e-6
+hp.lr['actor'].end = 1e-7
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
-hp.lr['critic'].start = 1e-7
-hp.lr['critic'].end = 1e-8
+hp.lr['critic'].start = 1e-5
+hp.lr['critic'].end = 1e-6
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
-hp.OUP_stddev_start = 0.5
+hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.05
-hp.OUP_stddev_nstep = 5e4
+hp.OUP_stddev_nstep = 1e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
 # For benchmark
