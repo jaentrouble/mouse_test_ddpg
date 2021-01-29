@@ -15,6 +15,9 @@ RENDER_BYTE = np.prod(RENDER_SIZE) * 4 #Channel 4
 
 RECV_BYTE = 16384
 
+MAX_SPEED = 0.5
+MAX_ANGLE = 10
+
 class MouseEnv_unity(gym.Env) :
     """MouseEnv_unity
 
@@ -35,8 +38,8 @@ class MouseEnv_unity(gym.Env) :
         # Speed [-1.0,1.0], Angle(degrees) [-90.0, 90.0]
         # Spin first and move
         self.action_space = Box(
-            low=np.array([-1.0,-10.0]),
-            high=np.array([1.0,10.0]),
+            low=np.array([-1.0,-1.0]),
+            high=np.array([1.0,1.0]),
             dtype=np.float32
         )
         self._done = False
@@ -71,8 +74,8 @@ class MouseEnv_unity(gym.Env) :
         action = np.clip(action,self.action_space.low, self.action_space.high)
 
         to_send = {
-            'move':float(action[0])*0.3,
-            'turn':float(action[1]),
+            'move':float(action[0])*MAX_SPEED,
+            'turn':float(action[1])*MAX_ANGLE,
             'reset':False,
         }
         data = self._send_and_receive(to_send)
