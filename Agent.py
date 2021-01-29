@@ -201,7 +201,12 @@ class Player():
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
         noised_action = self.oup_noise(raw_action)
-        return noised_action
+        action = tf.clip_by_value(
+            noised_action,
+            self.action_space.low,
+            self.action_space.high,
+        )
+        return action
 
     @tf.function
     def choose_action_no_noise(self, before_state):
