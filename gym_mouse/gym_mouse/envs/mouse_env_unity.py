@@ -9,7 +9,7 @@ import sys
 # NOTE: (WIDTH, HEIGHT)
 FRAME_SIZE = (80,80)
 FRAME_BYTE = np.prod(FRAME_SIZE) * 4 #Channel 4
-RENDER_SIZE = (192,192)
+RENDER_SIZE = (640,640)
 RENDER_BYTE = np.prod(RENDER_SIZE) * 4 #Channel 4
 
 

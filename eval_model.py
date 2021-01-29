@@ -12,6 +12,7 @@ from agent_assets import tools
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-l','--load', dest='load', required=True,)
+parser.add_argument('-s','--save',dest='save', required=True)
 parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
                     action='store_true',default=False)
 
@@ -38,6 +39,7 @@ player = Player(
     tqdm= None,
     mixed_float=args.mixed_float,
     m_dir=args.load,
+    log_name=args.save,
 )
 
 score = evaluate_f(player, env, 'mp4')
