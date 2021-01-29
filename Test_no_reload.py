@@ -44,22 +44,22 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].halt_steps = 0
-hp.lr['actor'].start = 1e-7
-hp.lr['actor'].end = 1e-8
+hp.lr['actor'].start = 1e-8
+hp.lr['actor'].end = 1e-9
 hp.lr['actor'].nsteps = 1e6
 
 hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-3
-hp.lr['critic'].end = 1e-4
+hp.lr['critic'].start = 1e-7
+hp.lr['critic'].end = 1e-8
 hp.lr['critic'].nsteps = 1e6
 
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
-hp.OUP_stddev_start = 1.0
+hp.OUP_stddev_start = 0.5
 hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
