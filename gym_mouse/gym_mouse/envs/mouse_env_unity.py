@@ -38,7 +38,7 @@ class MouseEnv_unity(gym.Env) :
         # Speed [-1.0,1.0], Angle(degrees) [-90.0, 90.0]
         # Spin first and move
         self.action_space = Box(
-            low=np.array([-1.0,-1.0]),
+            low=np.array([0.0,-1.0]),
             high=np.array([1.0,1.0]),
             dtype=np.float32
         )
