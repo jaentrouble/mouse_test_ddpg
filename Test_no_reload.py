@@ -8,8 +8,7 @@ from agent_assets import tools
 import agent_assets.A_hparameters as hp
 from tqdm import tqdm
 import argparse
-import os
-import sys
+from functools import partial
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
@@ -20,7 +19,7 @@ env_kwargs = dict(
 
 model_f = am.classic_iqn
 
-evaluate_f = tools.evaluate_common
+evaluate_f = partial(tools.evaluate_common,fps=30)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
