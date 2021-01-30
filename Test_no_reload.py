@@ -54,6 +54,7 @@ hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 1e4
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
+hp.OUP_clip = 0.8
 
 # For benchmark
 st = time.time()
