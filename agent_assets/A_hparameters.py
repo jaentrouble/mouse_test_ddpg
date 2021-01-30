@@ -10,7 +10,9 @@ class Lr():
     def __init__(self):
         self.start = None
         self.end = None
+        self.halt_steps = None
         self.nsteps = None
+        self.epsilon = None
 
 lr = {
     'actor' : Lr(),
@@ -20,11 +22,13 @@ lr['actor'].halt_steps = 0
 lr['actor'].start = 0.001
 lr['actor'].end = 0.00005
 lr['actor'].nsteps = 2000000
+lr['actor'].epsilon = 1e-2
 
 lr['critic'].halt_steps = 0
 lr['critic'].start = 0.001
 lr['critic'].end = 0.00005
 lr['critic'].nsteps = 2000000
+lr['critic'].epsilon = 1e-2
 
 
 OUP_damping = 0.15
