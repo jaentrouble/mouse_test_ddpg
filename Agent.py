@@ -206,6 +206,12 @@ class Player():
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
             tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         noised_action = self.oup_noise(raw_action)
+        if tf.random.uniform(())<hp.OUP_CLIP:
+            noised_action = tf.clip_by_value(
+                noised_action,
+                self.action_space.low,
+                self.action_space.high,
+            )
         return noised_action
 
     @tf.function
