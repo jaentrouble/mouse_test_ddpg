@@ -84,10 +84,13 @@ def critic_dense_iqn(observation_space, action_space, encoder_f):
     # Shape (batch, support, 256)
     x = layers.Multiply(name='critic_mul_phi')([phi, x_reshaped])
     
-    x = layers.Dense(128, activation='relu',
+    x = layers.Dense(512, activation='relu',
                      name='critic_dense2')(x)
-    x = layers.Dense(64, activation='relu',
+    x = layers.Dense(512, activation='relu',
                      name='critic_dense3')(x)
+    x = layers.Dense(512, activation='relu',
+                     name='critic_dense4')(x)
+
     # Shape (batch, support, 1)
     x = layers.Dense(1, activation='linear',
                      dtype='float32', name='critic_dense4')(x)
