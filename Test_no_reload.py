@@ -65,6 +65,7 @@ hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 hp.OUP_CLIP = 0.8
 
+hp.Target_update_tau = 1e-3
 
 # For benchmark
 st = time.time()
