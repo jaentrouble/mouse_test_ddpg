@@ -93,7 +93,7 @@ def critic_dense_iqn(observation_space, action_space, encoder_f):
 
     # Shape (batch, support, 1)
     x = layers.Dense(1, activation='linear',
-                     dtype='float32', name='critic_dense4')(x)
+                     dtype='float32', name='critic_dense5')(x)
     # Output shape (batch, support)
     outputs = tf.squeeze(x, name='critic_squeeze')
     outputs = layers.Activation('linear',dtype=tf.float32,
