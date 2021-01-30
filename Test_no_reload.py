@@ -44,11 +44,13 @@ hp.lr['actor'].start = 1e-6
 hp.lr['actor'].end = 1e-7
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
+hp.lr['actor'].epsilon = 1e-2
 
 hp.lr['critic'].start = 1e-5
 hp.lr['critic'].end = 1e-6
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
+hp.lr['actor'].epsilon = 1e-2
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
