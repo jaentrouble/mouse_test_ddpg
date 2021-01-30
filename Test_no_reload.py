@@ -52,16 +52,16 @@ hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-6
+hp.lr['critic'].start = 1e-7
+hp.lr['critic'].end = 1e-8
 hp.lr['critic'].nsteps = 1e6
 
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
 hp.OUP_stddev_start = 1.0
-hp.OUP_stddev_end = 0.05
-hp.OUP_stddev_nstep = 2e4
+hp.OUP_stddev_end = 0.2
+hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 hp.OUP_CLIP = 0.8
 
