@@ -31,7 +31,7 @@ OUP_damping = 0.15
 OUP_stddev_start=0.2
 OUP_stddev_end = 0.05
 OUP_stddev_nstep = 500000
-OUP_CLIP = 0.8
+OUP_clip = 0.8
 
 IQN_SUPPORT = 64
 IQN_COS_EMBED = 64
