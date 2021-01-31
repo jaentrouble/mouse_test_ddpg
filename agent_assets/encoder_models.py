@@ -61,6 +61,18 @@ def encoder_simple_dense(observation_space):
                          name='encoder_dense2')(x)
     return outputs, [inputs]
 
+def encoder_simple_dense_2(observation_space):
+    inputs = keras.Input(observation_space['obs'].shape,
+                         name='obs')
+    x = layers.Flatten(name='encoder_flatten')(inputs)
+    x = layers.Dense(512, activation='relu',
+                         name='encoder_dense1')(x)
+    x = layers.Dense(512, activation='relu',
+                         name='encoder_dense2')(x)
+    outputs = layers.Dense(512, activation='linear',
+                         name='encoder_dense3')(x)
+    return outputs, [inputs]
+
 def encoder_simple_res(observation_space):
     inputs = keras.Input(observation_space['obs'].shape,
                          name='obs')

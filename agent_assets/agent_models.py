@@ -30,7 +30,7 @@ def eye_brain_model(observation_space, action_space):
     return actor, critic
 
 def classic_model(observation_space, action_space):
-    encoder_f = em.encoder_simple_dense
+    encoder_f = em.encoder_simple_dense_2
 
     actor = am.actor_simple_dense(observation_space, action_space, encoder_f)
 
