@@ -1,9 +1,5 @@
 import gym
-import gym_mouse
 import time
-from tqdm import trange
-import numpy as np
-import cv2
 import argparse
 from Agent import Player
 import agent_assets.agent_models as am
