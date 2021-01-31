@@ -13,6 +13,7 @@ class Lr():
         self.halt_steps = None
         self.nsteps = None
         self.epsilon = None
+        self.grad_clip = None
 
 lr = {
     'actor' : Lr(),
@@ -23,12 +24,14 @@ lr['actor'].start = 0.001
 lr['actor'].end = 0.00005
 lr['actor'].nsteps = 2000000
 lr['actor'].epsilon = 1e-2
+lr['actor'].grad_clip = 1.0
 
 lr['critic'].halt_steps = 0
 lr['critic'].start = 0.001
 lr['critic'].end = 0.00005
 lr['critic'].nsteps = 2000000
 lr['critic'].epsilon = 1e-2
+lr['critic'].grad_clip = 1.0
 
 
 OUP_damping = 0.15

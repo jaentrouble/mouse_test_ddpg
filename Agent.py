@@ -92,7 +92,11 @@ class Player():
             # compile models
             for name, model in self.models.items():
                 lr = tf.function(partial(self._lr, name))
-                optimizer = keras.optimizers.Adam(learning_rate=lr)
+                optimizer = keras.optimizers.Adam(
+                    learning_rate=lr,
+                    epsilon=hp.lr[name].epsilon,
+                    global_clipnorm=hp.lr[name].grad_clip,
+                )
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
                         optimizer
@@ -110,6 +114,7 @@ class Player():
                 optimizer = keras.optimizers.Adam(
                     learning_rate=lr,
                     epsilon=hp.lr[name].epsilon,
+                    global_clipnorm=hp.lr[name].grad_clip,
                 )
                 if self.mixed_float:
                     optimizer = mixed_precision.LossScaleOptimizer(
