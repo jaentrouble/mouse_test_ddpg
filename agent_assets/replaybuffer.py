@@ -40,6 +40,8 @@ class ReplayBuffer():
         done
             d_t
         """
+        if self.next_idx == self.size-1:
+            self._recalculate_sum()
         for name, obs in observation.items() :
             self.obs_buffer[name][self.next_idx] = obs
         self.action_buffer[self.next_idx] = action
@@ -84,6 +86,14 @@ class ReplayBuffer():
             self.prior_tree[parent_idx] += delta
 
             parent_idx = (parent_idx -1) //2
+
+    def _recalculate_sum(self):
+        """Recalculate all parent nodes
+        """
+        for idx in range(self.size-2,-1,-1):
+            left_child = self.prior_tree[idx*2+1]
+            right_child = self.prior_tree[idx*2+2]
+            self.prior_tree[idx] = left_child + right_child
 
     def _get_idx_from_s(self, s):
         """Get tree index from sampled s value"""
