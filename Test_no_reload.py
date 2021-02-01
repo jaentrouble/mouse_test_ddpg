@@ -17,7 +17,7 @@ ENVIRONMENT = 'BipedalWalker-v3'
 env_kwargs = dict(
 )
 
-model_f = am.classic_iqn
+model_f = am.classic_model
 
 evaluate_f = partial(tools.evaluate_common,fps=30)
 
