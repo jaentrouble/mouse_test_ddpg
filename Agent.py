@@ -158,12 +158,15 @@ class Player():
         self.model_dir = None
 
     def _lr(self, name):
-        if tf.greater(self.total_steps, int(hp.lr[name].nsteps)):
+        effective_steps = self.total_steps - hp.Learn_start
+        if tf.greater(effective_steps, int(hp.lr[name].nsteps)):
             return hp.lr[name].end
+        elif tf.less(effective_steps, 0):
+            return 0.0
         else :
             new_lr = hp.lr[name].start*\
                 ((hp.lr[name].end/hp.lr[name].start)**\
-                    (tf.cast(self.total_steps,tf.float32)/hp.lr[name].nsteps))
+                    (tf.cast(effective_steps,tf.float32)/hp.lr[name].nsteps))
             return new_lr
 
     @property
@@ -198,6 +201,9 @@ class Player():
         """
         processed_state = self.pre_processing(before_state)
         raw_action = self.models['actor'](processed_state, training=False)
+        if self.total_steps % hp.log_per_steps == 0:
+            tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
+            tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         action = self.oup_noise(raw_action)
         action = tf.clip_by_value(
             action,
@@ -247,8 +253,14 @@ class Player():
             action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0',action[0][0], self.total_steps)
+                tf.summary.scalar('a1',action[0][1], self.total_steps)
             return action_np[0]
         else:
+            if self.total_steps % hp.log_per_steps==0 and not evaluate:
+                tf.summary.scalar('a0',action[0], self.total_steps)
+                tf.summary.scalar('a1',action[1], self.total_steps)
             return action_np
 
 
@@ -347,6 +359,17 @@ class Player():
             zip(actor_gradients, actor_vars)
         )
 
+        tf.summary.scalar(
+            'critic_grad_norm',
+            tf.linalg.global_norm(critic_gradients),
+            step=self.total_steps,
+        )
+        tf.summary.scalar(
+            'actor_grad_norm',
+            tf.linalg.global_norm(actor_gradients),
+            step=self.total_steps,
+        )
+
         priority = (tf.math.abs(q-critic_target)+hp.Buf.epsilon)**hp.Buf.alpha
         return priority
 
@@ -355,25 +378,19 @@ class Player():
         self.buffer.store_step(before, action, reward, done)
         self.tqdm.update()
         # Record here, so that it won't record when evaluating
-        # if info['ate_apple']:
-        #     self.score += 1
         self.cumreward += reward
         if self.total_steps % hp.log_per_steps==0:
             for name in self.models:
                 tf.summary.scalar(f'lr_{name}',self._lr(name),self.total_steps)
         if done:
-            # tf.summary.scalar('Score', self.score, self.rounds)
             tf.summary.scalar('Reward', self.cumreward, self.rounds)
-            # tf.summary.scalar('Score_step', self.score, self.total_steps)
             tf.summary.scalar('Reward_step', self.cumreward, self.total_steps)
             info_dict = {
                 'Round':self.rounds,
                 'Steps':self.current_steps,
-                # 'Score':self.score,
                 'Reward':self.cumreward,
             }
             self.tqdm.set_postfix(info_dict)
-            # self.score = 0
             self.current_steps = 0
             self.cumreward = 0
             self.rounds += 1
@@ -397,7 +414,6 @@ class Player():
                                     self.buffer.sample(hp.Batch_size)
             s_batch = self.pre_processing(s_batch)
             sp_batch = self.pre_processing(sp_batch)
-            # tf_total_steps = tf.constant(self.total_steps, dtype=tf.int64)
             weights = tf.convert_to_tensor(weights, dtype=tf.float32)
 
             data = (
@@ -406,7 +422,6 @@ class Player():
                 d_batch, 
                 a_batch, 
                 sp_batch, 
-                # tf_total_steps,
                 weights,
             )
 

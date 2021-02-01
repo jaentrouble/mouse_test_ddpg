@@ -29,7 +29,6 @@ parser.add_argument('-r','--render', dest='render',action='store_true', default=
 parser.add_argument('--step', dest='total_steps',default=100000, type=int)
 parser.add_argument('-n','--logname', dest='log_name',default=None)
 parser.add_argument('-pf', dest='profile',action='store_true',default=False)
-# parser.add_argument('-lr', dest='lr', default=1e-5, type=float)
 parser.add_argument('-mf','--mixedfloat', dest='mixed_float', 
                     action='store_true',default=False)
 parser.add_argument('-l','--load', dest='load', default=None)
@@ -47,18 +46,21 @@ hp.lr['actor'].start = 1e-6
 hp.lr['actor'].end = 1e-11
 hp.lr['actor'].nsteps = 1e6
 
+hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
+
 hp.lr['critic'].start = 1e-5
 hp.lr['critic'].end = 1e-10
 hp.lr['critic'].nsteps = 1e6
 
+hp.lr['critic'].nsteps = int(hp.lr['actor'].nsteps)
+
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 200000
+hp.OUP_stddev_nstep = 2e5
+
+hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
 
-if args.render :
-    from gym.envs.classic_control.rendering import SimpleImageViewer
-    eye_viewer = SimpleImageViewer(maxwidth=1500)
 # For benchmark
 st = time.time()
 
