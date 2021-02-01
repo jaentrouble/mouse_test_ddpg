@@ -12,7 +12,7 @@ from functools import partial
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'BipedalWalker-v3'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
 )
@@ -40,28 +40,28 @@ my_tqdm = tqdm(total=total_steps, dynamic_ncols=True)
 hp.Model_save = 30000
 hp.Learn_start = 20000
 
-hp.lr['actor'].start = 1e-5
-hp.lr['actor'].end = 1e-5
+hp.lr['actor'].start = 1e-4
+hp.lr['actor'].end = 1e-4
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 hp.lr['actor'].epsilon = 1e-2
 hp.lr['actor'].grad_clip = 1e-1
 
 
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-5
+hp.lr['critic'].start = 1e-4
+hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 hp.lr['critic'].epsilon = 1e-2
-hp.lr['critic'].grad_clip = 1e-1
+hp.lr['critic'].grad_clip = None
 
 hp.OUP_stddev_start = 1.0
-hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 2e5
+hp.OUP_stddev_end = 0.05
+hp.OUP_stddev_nstep = 2e4
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 hp.OUP_clip = 0.8
 
-hp.Target_update_tau = 1e-3
+hp.Target_update_tau = 1e-1
 hp.IQN_SUPPORT = 64
 
 # For benchmark
