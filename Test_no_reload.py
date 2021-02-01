@@ -12,7 +12,7 @@ from functools import partial
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'BipedalWalker-v3'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
 )
