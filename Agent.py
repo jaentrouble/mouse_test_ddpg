@@ -388,17 +388,16 @@ class Player():
             zip(actor_gradients, actor_vars)
         )
 
-        # if self.total_steps % hp.log_per_steps==0:
-        # tf.summary.scalar(
-        #     'critic_grad_norm',
-        #     tf.linalg.global_norm(critic_gradients),
-        #     step=self.total_steps,
-        # )
-        # tf.summary.scalar(
-        #     'actor_grad_norm',
-        #     tf.linalg.global_norm(actor_gradients),
-        #     step=self.total_steps,
-        # )
+        tf.summary.scalar(
+            'critic_grad_norm',
+            tf.linalg.global_norm(critic_gradients),
+            step=self.total_steps,
+        )
+        tf.summary.scalar(
+            'actor_grad_norm',
+            tf.linalg.global_norm(actor_gradients),
+            step=self.total_steps,
+        )
 
         priority = (critic_unweighted_loss+hp.Buf.epsilon)**hp.Buf.alpha
         return priority
