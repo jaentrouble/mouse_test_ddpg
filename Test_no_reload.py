@@ -48,7 +48,7 @@ hp.lr['actor'].start = 1e-6
 hp.lr['actor'].end = 1e-6
 hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-2
-hp.lr['actor'].grad_clip = 0.1
+hp.lr['actor'].grad_clip = None
 
 hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
@@ -58,7 +58,7 @@ hp.lr['critic'].start = 1e-6
 hp.lr['critic'].end = 1e-6
 hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-2
-hp.lr['critic'].grad_clip = 0.1
+hp.lr['critic'].grad_clip = None
 
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
