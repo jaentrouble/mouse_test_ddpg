@@ -9,8 +9,8 @@ import tqdm
 import json
 import ffmpeg
 
-TEST_PER_MODEL = 100
-MAX_TRIAL = 200
+TEST_PER_MODEL = 2
+MAX_TRIAL = 2
 FRAMERATE = 10
 
 ENVIRONMENT = 'mouseUnity-v0'
@@ -33,6 +33,9 @@ vid_dir = result_dir/'videos'
 if not vid_dir.exists():
     vid_dir.mkdir()
 
+model_list = list(save_dir.iterdir())
+model_list.remove(result_dir)
+
 log_name = f'{args.load}_tries_to_reward'
 
 env = gym.make(ENVIRONMENT, **env_kwargs)
@@ -51,7 +54,7 @@ all_try_results=[]
 all_steps_results = []
 
 for model_dir in tqdm.tqdm(
-    list(save_dir.iterdir()),
+    model_list,
     unit='model',
 ):
     player.reload_model(str(model_dir))
@@ -64,8 +67,10 @@ for model_dir in tqdm.tqdm(
     ):
         rewarded = False
         tries = 0
-        while (not rewarded) or tries>MAX_TRIAL:
+        try_tqdm = tqdm.tqdm(unit='try',total=MAX_TRIAL, leave=False)
+        while (not rewarded) and tries < MAX_TRIAL:
             tries += 1
+            try_tqdm.update()
             speed_tqdm = tqdm.tqdm(unit='step',leave=False)
             
             done=False
@@ -113,7 +118,7 @@ for model_dir in tqdm.tqdm(
             obs_out.stdin.close()
             ren_out.stdin.close()
             speed_tqdm.close()
-
+        try_tqdm.close()
         tries_results.append(tries)
         steps_results.append(steps)
     all_try_results.append(tries_results)
