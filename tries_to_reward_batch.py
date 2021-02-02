@@ -1,5 +1,5 @@
-from Test_no_reload import ENVIRONMENT
 import gym
+import gym_mouse
 import argparse
 from Agent import Player
 import agent_assets.agent_models as am
@@ -103,10 +103,10 @@ for model_dir in tqdm.tqdm(
                 a = player.act(o, evaluate=False)
                 o,r,done,_ = env.step(a)
                 obs_out.stdin.write(
-                    o['obs'][...,-3:]
+                    o['obs'][...,-3:].copy(order='C')
                 )
                 ren = env.render('rgb')
-                ren_out.stdin.write(ren)
+                ren_out.stdin.write(ren.copy(order='C'))
                 if r>0 :
                     rewarded = True
                     break

@@ -15,6 +15,9 @@ builds/
 *.png
 *.mp4
 
+#ffmpeg
+ffmpeg.exe
+
 # Tensorboard thing
 boardenv/
 
