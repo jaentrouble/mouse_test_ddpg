@@ -9,8 +9,8 @@ import tqdm
 import json
 import ffmpeg
 
-TEST_PER_MODEL = 100
-MAX_TRIAL = 200
+TEST_PER_MODEL = 10
+MAX_TRIAL = 100
 FRAMERATE = 10
 
 ENVIRONMENT = 'mouseUnity-v0'
