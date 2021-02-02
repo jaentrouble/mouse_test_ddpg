@@ -18,6 +18,9 @@ RECV_BYTE = 16384
 MAX_SPEED = 0.5
 MAX_ANGLE = 10
 
+NUTELLA_REWARD = 200
+PUNISH_STEP = 0.1
+
 class MouseEnv_unity(gym.Env) :
     """MouseEnv_unity
 
@@ -91,12 +94,21 @@ class MouseEnv_unity(gym.Env) :
         }
         info_str = data[FRAME_BYTE:].decode('utf-8')
         info = json.loads(info_str)
-        reward = info['reward']
-        done = info['done']
 
+        reward = info['reward'] * NUTELLA_REWARD
+        # Movement punishment
+        d = action[0]*MAX_SPEED
+        theta = action[1]*MAX_ANGLE*np.pi/180
+        x = np.sqrt(np.absolute(
+            1 + (1+d)**2 - 2*(1+d)*np.cos(theta)
+        ))
+        p = PUNISH_STEP + x
+        reward -= p
+
+
+        done = info['done']
         if done:
             self._done = True
-        
         #Check if reached max_step
         self.cur_step += 1
         if self.cur_step >= self.max_step:
