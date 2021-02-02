@@ -35,7 +35,6 @@ if not vid_dir.exists():
     vid_dir.mkdir()
 
 model_list = [save_dir/str(t) for t in TARGET_MODELS]
-model_list.sort()
 
 log_name = f'{args.load}_tries_to_reward'
 
