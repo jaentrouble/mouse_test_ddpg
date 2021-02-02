@@ -41,14 +41,14 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].start = 1e-4
-hp.lr['actor'].end = 1e-4
+hp.lr['actor'].end = 1e-5
 hp.lr['actor'].nsteps = 5e5
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 hp.lr['actor'].epsilon = 1e-2
-hp.lr['actor'].grad_clip = 1e-1
+hp.lr['actor'].grad_clip = None
 
 
-hp.lr['critic'].start = 1e-4
+hp.lr['critic'].start = 1e-3
 hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 5e5
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
