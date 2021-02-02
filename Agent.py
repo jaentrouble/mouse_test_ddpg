@@ -166,6 +166,11 @@ class Player():
                     (tf.cast(self.total_steps,tf.float32)/hp.lr[name].nsteps))
             return new_lr
 
+    def reload_model(self, model_dir:str):
+        for name,model in self.models.items():
+            model.load_weights(path.join(model_dir,name))
+        print('Model reloaded from'+model_dir)
+
     @property
     @tf.function
     def oup_stddev(self):
