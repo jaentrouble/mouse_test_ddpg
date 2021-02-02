@@ -20,6 +20,7 @@ MAX_ANGLE = 10
 
 NUTELLA_REWARD = 100
 PUNISH_STEP = 1
+PUNISH_DIST = 0
 
 class MouseEnv_unity(gym.Env) :
     """MouseEnv_unity
@@ -102,7 +103,7 @@ class MouseEnv_unity(gym.Env) :
         x = np.sqrt(np.absolute(
             1 + (1+d)**2 - 2*(1+d)*np.cos(theta)
         ))
-        p = PUNISH_STEP + x
+        p = PUNISH_STEP + x*PUNISH_DIST
         reward -= p
 
 
