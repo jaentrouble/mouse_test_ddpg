@@ -18,8 +18,8 @@ RECV_BYTE = 16384
 MAX_SPEED = 0.5
 MAX_ANGLE = 10
 
-NUTELLA_REWARD = 200
-PUNISH_STEP = 0.1
+NUTELLA_REWARD = 100
+PUNISH_STEP = 1
 
 class MouseEnv_unity(gym.Env) :
     """MouseEnv_unity
