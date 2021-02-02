@@ -35,6 +35,7 @@ if not vid_dir.exists():
 
 model_list = list(save_dir.iterdir())
 model_list.remove(result_dir)
+model_list.sort()
 
 log_name = f'{args.load}_tries_to_reward'
 
