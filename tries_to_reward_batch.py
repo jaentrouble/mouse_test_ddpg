@@ -9,14 +9,14 @@ import tqdm
 import json
 import ffmpeg
 
-TEST_PER_MODEL = 2
-MAX_TRIAL = 2
+TEST_PER_MODEL = 100
+MAX_TRIAL = 200
 FRAMERATE = 10
 
 ENVIRONMENT = 'mouseUnity-v0'
 env_kwargs = dict(
     ip='localhost',
-    port=7777,
+    port=7778,
 )
 
 parser = argparse.ArgumentParser()
