@@ -12,6 +12,7 @@ import ffmpeg
 TEST_PER_MODEL = 10
 MAX_TRIAL = 100
 FRAMERATE = 10
+TARGET_MODELS = [8,16,24,32,40,48,56,64]
 
 ENVIRONMENT = 'mouseUnity-v0'
 env_kwargs = dict(
@@ -33,8 +34,7 @@ vid_dir = result_dir/'videos'
 if not vid_dir.exists():
     vid_dir.mkdir()
 
-model_list = list(save_dir.iterdir())
-model_list.remove(result_dir)
+model_list = [save_dir/str(t) for t in TARGET_MODELS]
 model_list.sort()
 
 log_name = f'{args.load}_tries_to_reward'
