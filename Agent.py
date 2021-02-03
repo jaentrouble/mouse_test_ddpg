@@ -374,7 +374,7 @@ class Player():
             )
             # In IQN, q is mean of all supports
             q = tf.reduce_mean(support, axis=-1)
-            soft_q = q - self.alpha * log_pi
+            soft_q = q - self.soft_alpha * log_pi
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(soft_q)
             if self.mixed_float:
@@ -397,16 +397,16 @@ class Player():
         action, log_pi = self.models['actor'](o, training=False)
         with tf.GradientTape() as alpha_tape:
             alpha_loss = tf.reduce_mean(
-                -self.alpha * (log_pi + self.target_entropy)
+                -self.soft_alpha * (log_pi + self.target_entropy)
             )
-        alpha_vars = [self.alpha]
+        alpha_vars = [self.soft_alpha]
         alpha_gradients = alpha_tape.gradient(alpha_loss, alpha_vars)
         self.alpha_optimizer.apply_gradients(zip(alpha_gradients,alpha_vars))
 
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar(
                 'soft_alpha',
-                self.alpha,
+                self.soft_alpha,
                 step=self.total_steps,
             )
 
