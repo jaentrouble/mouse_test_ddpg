@@ -49,7 +49,6 @@ def actor_soft_dense(observation_space, action_space, encoder_f):
     """
     encoded_state, encoder_inputs = encoder_f(observation_space)
     s = layers.Flatten(name='actor_flatten_state')(encoded_state)
-    batch_size = tf.shape(s)[0]
 
     action_shape = action_space.shape
     action_num = tf.math.reduce_prod(action_shape)
@@ -70,7 +69,7 @@ def actor_soft_dense(observation_space, action_space, encoder_f):
 
     normal_dist = tfp.distributions.MultivariateNormalDiag(
         mu, sigma, name='actor_dist')
-    raw_action = normal_dist.sample(batch_size)
+    raw_action = normal_dist.sample()
 
     squashed_action = keras.activations.tanh(raw_action)
 
