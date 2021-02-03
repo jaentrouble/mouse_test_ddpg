@@ -85,7 +85,8 @@ class Player():
 
         # Soft Actor Critic variable
         self.soft_alpha = tf.Variable(0.0, trainable=True,dtype=tf.float32)
-        self.target_entropy = -tf.reduce_prod(self.action_shape)
+        self.target_entropy = tf.cast(
+            -tf.reduce_prod(self.action_shape),dtype='float32')
         alpha_lr = tf.function(partial(self._lr, 'alpha'))
         self.alpha_optimizer = keras.optimizers.Adam(
             learning_rate=alpha_lr,
