@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow import math as tm
 from tensorflow import keras
 from tensorflow.keras import layers
+from tensorflow.python.ops.clip_ops import global_norm
 import agent_assets.A_hparameters as hp
 from datetime import datetime
 from os import path, makedirs
@@ -82,13 +83,23 @@ class Player():
         # Ornstein-Uhlenbeck process
         self.last_oup = 0
 
-        #Inputs
+        # Soft Actor Critic variable
+        self.soft_alpha = tf.Variable(0.0, trainable=True,dtype=tf.float32)
+        self.target_entropy = -tf.reduce_prod(self.action_shape)
+        alpha_lr = tf.function(partial(self._lr, 'alpha'))
+        self.alpha_optimizer = keras.optimizers.Adam(
+            learning_rate=alpha_lr,
+            epsilon=hp.lr['alpha'].epsilon,
+            global_clipnorm=hp.lr['alpha'].grad_clip,
+        )
+
+        
+        actor, critic = model_f(observation_space, action_space)
+        self.models={
+            'actor' : actor,
+            'critic' : critic,
+        }
         if m_dir is None :
-            actor, critic = model_f(observation_space, action_space)
-            self.models={
-                'actor' : actor,
-                'critic' : critic,
-            }
             # compile models
             for name, model in self.models.items():
                 lr = tf.function(partial(self._lr, name))
@@ -103,11 +114,6 @@ class Player():
                     )
                 model.compile(optimizer=optimizer)
         else:
-            actor, critic = model_f(observation_space, action_space)
-            self.models={
-                'actor' : actor,
-                'critic' : critic,
-            }
             # compile models
             for name, model in self.models.items():
                 lr = tf.function(partial(self._lr, name))
@@ -209,7 +215,7 @@ class Player():
         Policy part
         """
         processed_state = self.pre_processing(before_state)
-        raw_action = self.models['actor'](processed_state, training=False)
+        raw_action, _ = self.models['actor'](processed_state, training=False)
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
             tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
@@ -237,7 +243,7 @@ class Player():
         For evaluation; no noise is added
         """
         processed_state = self.pre_processing(before_state)
-        raw_action = self.models['actor'](processed_state, training=False)
+        raw_action, _ = self.models['actor'](processed_state, training=False)
         action = raw_action
         return action
 
@@ -299,20 +305,23 @@ class Player():
         tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
-        t_action = self.t_models['actor'](sp_batch, training=False)
+        # In Soft Actor Critic, current policy is used
+        next_action, log_pi = self.models['actor'](sp_batch, training=False)
+
         # add action, tau to input
         t_critic_input = sp_batch.copy()
-        t_critic_input['action'] = t_action
+        t_critic_input['action'] = next_action
         t_critic_input['tau'] = tau
         target_support = self.t_models['critic'](
             t_critic_input, 
             training=False,
         )
+        soft_target = target_support - self.soft_alpha * log_pi
         # Shape (batch, support)
         critic_target = r[...,tf.newaxis] + \
                         tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
                         hp.Q_discount * \
-                        target_support
+                        soft_target
 
         # First update critic
         with tf.GradientTape() as critic_tape:
@@ -366,9 +375,11 @@ class Player():
         )
 
         # Then update actor
+        tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
         with tf.GradientTape() as actor_tape:
-            action = self.models['actor'](o, training=True)
-            # change action
+            action, log_pi = self.models['actor'](o, training=True)
+            # New input
+            critic_input = o.copy()
             critic_input['action'] = action
             critic_input['tau'] = tau
             # Shape (batch, support)
@@ -378,8 +389,9 @@ class Player():
             )
             # In IQN, q is mean of all supports
             q = tf.reduce_mean(support, axis=-1)
+            soft_q = q - self.alpha * log_pi
             # Actor needs to 'ascend' gradient
-            J = (-1.0) * tf.reduce_mean(q)
+            J = (-1.0) * tf.reduce_mean(soft_q)
             if self.mixed_float:
                 J = self.models['actor'].optimizer.get_scaled_loss(J)
 
@@ -395,6 +407,23 @@ class Player():
         self.models['actor'].optimizer.apply_gradients(
             zip(actor_gradients, actor_vars)
         )
+
+        # Finally, update Soft Actor Critic alpha
+        action, log_pi = self.models['actor'](o, training=False)
+        with tf.GradientTape() as alpha_tape:
+            alpha_loss = tf.reduce_mean(
+                -self.alpha * (log_pi + self.target_entropy)
+            )
+        alpha_vars = [self.alpha]
+        alpha_gradients = alpha_tape.gradient(alpha_loss, alpha_vars)
+        self.alpha_optimizer.apply_gradients(zip(alpha_gradients,alpha_vars))
+
+        if self.total_steps % hp.log_per_steps==0:
+            tf.summary.scalar(
+                'soft_alpha',
+                self.alpha,
+                step=self.total_steps,
+            )
 
         tf.summary.scalar(
             'critic_grad_norm',

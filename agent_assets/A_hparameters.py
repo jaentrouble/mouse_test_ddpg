@@ -18,7 +18,9 @@ class Lr():
 lr = {
     'actor' : Lr(),
     'critic' : Lr(),
+    'alpha' : Lr(),
 }
+
 lr['actor'].halt_steps = 0
 lr['actor'].start = 0.001
 lr['actor'].end = 0.00005
@@ -32,6 +34,13 @@ lr['critic'].end = 0.00005
 lr['critic'].nsteps = 2000000
 lr['critic'].epsilon = 1e-2
 lr['critic'].grad_clip = 1.0
+
+lr['alpha'].halt_steps = 0
+lr['alpha'].start = 0.001
+lr['alpha'].end = 0.00005
+lr['alpha'].nsteps = 2000000
+lr['alpha'].epsilon = 1e-2
+lr['alpha'].grad_clip = 1.0
 
 
 OUP_damping = 0.15

@@ -63,6 +63,16 @@ hp.lr['critic'].grad_clip = None
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
 
+hp.lr['alpha'].halt_steps = 0
+hp.lr['alpha'].start = 1e-4
+hp.lr['alpha'].end = 1e-4
+hp.lr['alpha'].nsteps = 1e6
+hp.lr['alpha'].epsilon = 1e-2
+hp.lr['alpha'].grad_clip = 1.0
+
+hp.lr['alpha'].halt_steps = int(hp.lr['alpha'].halt_steps)
+hp.lr['alpha'].nsteps = int(hp.lr['alpha'].nsteps)
+
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
 hp.OUP_stddev_nstep = 2e5
