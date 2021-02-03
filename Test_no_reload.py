@@ -48,7 +48,7 @@ hp.lr['actor'].start = 1e-6
 hp.lr['actor'].end = 1e-6
 hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-2
-hp.lr['actor'].grad_clip = 0.5
+hp.lr['actor'].grad_clip = None
 
 hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
@@ -68,16 +68,16 @@ hp.lr['alpha'].start = 1e-4
 hp.lr['alpha'].end = 1e-4
 hp.lr['alpha'].nsteps = 1e6
 hp.lr['alpha'].epsilon = 1e-2
-hp.lr['alpha'].grad_clip = 1.0
+hp.lr['alpha'].grad_clip = None
 
 hp.lr['alpha'].halt_steps = int(hp.lr['alpha'].halt_steps)
 hp.lr['alpha'].nsteps = int(hp.lr['alpha'].nsteps)
 
-hp.OUP_stddev_start = 1.0
-hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 2e5
-hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
-hp.OUP_CLIP = 0.8
+# hp.OUP_stddev_start = 1.0
+# hp.OUP_stddev_end = 0.2
+# hp.OUP_stddev_nstep = 2e5
+# hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
+# hp.OUP_CLIP = 0.8
 
 hp.Target_update_tau = 1e-3
 

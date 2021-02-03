@@ -184,15 +184,15 @@ class Player():
                     (tf.cast(effective_steps,tf.float32)/hp.lr[name].nsteps))
             return new_lr
 
-    @property
-    @tf.function
-    def oup_stddev(self):
-        if tf.greater(self.total_steps, hp.OUP_stddev_nstep) :
-            return hp.OUP_stddev_end
-        else:
-            return tf.cast(hp.OUP_stddev_start+\
-                (hp.OUP_stddev_end-hp.OUP_stddev_start)*\
-                (self.total_steps/hp.OUP_stddev_nstep),dtype=tf.float32)
+    # @property
+    # @tf.function
+    # def oup_stddev(self):
+    #     if tf.greater(self.total_steps, hp.OUP_stddev_nstep) :
+    #         return hp.OUP_stddev_end
+    #     else:
+    #         return tf.cast(hp.OUP_stddev_start+\
+    #             (hp.OUP_stddev_end-hp.OUP_stddev_start)*\
+    #             (self.total_steps/hp.OUP_stddev_nstep),dtype=tf.float32)
 
     @tf.function
     def pre_processing(self, observation:dict):
@@ -215,46 +215,31 @@ class Player():
         Policy part
         """
         processed_state = self.pre_processing(before_state)
-        raw_action, _ = self.models['actor'](processed_state, training=False)
-        if self.total_steps % hp.log_per_steps==0:
-            tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
-            tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
-        noised_action = self.oup_noise(raw_action)
-        if tf.random.uniform(())<hp.OUP_clip:
-            raw_action = tf.clip_by_value(
-                raw_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-            noised_action = self.oup_noise(raw_action)
-            noised_action = tf.clip_by_value(
-                noised_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-        else:
-            noised_action = self.oup_noise(raw_action)
-        return noised_action
-
-    @tf.function
-    def choose_action_no_noise(self, before_state):
-        """
-        Policy part
-        For evaluation; no noise is added
-        """
-        processed_state = self.pre_processing(before_state)
-        raw_action, _ = self.models['actor'](processed_state, training=False)
-        action = raw_action
+        action, _ = self.models['actor'](processed_state, training=False)
+        # if self.total_steps % hp.log_per_steps==0:
+        #     tf.summary.scalar('a0_raw', action[0][0], self.total_steps)
+        #     tf.summary.scalar('a1_raw', action[0][1], self.total_steps)
         return action
+
+    # @tf.function
+    # def choose_action_no_noise(self, before_state):
+    #     """
+    #     Policy part
+    #     For evaluation; no noise is added
+    #     """
+    #     processed_state = self.pre_processing(before_state)
+    #     raw_action, _ = self.models['actor'](processed_state, training=False)
+    #     action = raw_action
+    #     return action
 
     
 
 
     def act_batch(self, before_state, evaluate=False):
-        if evaluate:
-            action = self.choose_action_no_noise(before_state)
-        else:
-            action = self.choose_action(before_state)
+        # if evaluate:
+        #     action = self.choose_action_no_noise(before_state)
+        # else:
+        action = self.choose_action(before_state)
         return action.numpy()
         
     def act(self, before_state, evaluate=False):
@@ -264,10 +249,10 @@ class Player():
         
         If eval = True, noise is not added
         """
-        if evaluate:
-            action = self.choose_action_no_noise(before_state)
-        else:
-            action = self.choose_action(before_state)
+        # if evaluate:
+        #     action = self.choose_action_no_noise(before_state)
+        # else:
+        action = self.choose_action(before_state)
         action_np = action.numpy()
         if action_np.shape[0] == 1:
             if self.total_steps % hp.log_per_steps==0 and not evaluate:
@@ -281,19 +266,19 @@ class Player():
             return action_np
 
 
-    @tf.function
-    def oup_noise(self, action):
-        """
-        Add Ornstein-Uhlenbeck noise to action
-        """
-        noise = (1 - hp.OUP_damping)*self.last_oup + \
-                tf.random.normal(
-                    shape=self.action_shape, 
-                    mean=0.0,
-                    stddev=self.oup_stddev,
-                )*self.action_range
-        self.last_oup = noise
-        return action + noise
+    # @tf.function
+    # def oup_noise(self, action):
+    #     """
+    #     Add Ornstein-Uhlenbeck noise to action
+    #     """
+    #     noise = (1 - hp.OUP_damping)*self.last_oup + \
+    #             tf.random.normal(
+    #                 shape=self.action_shape, 
+    #                 mean=0.0,
+    #                 stddev=self.oup_stddev,
+    #             )*self.action_range
+    #     self.last_oup = noise
+    #     return action + noise
 
     @tf.function
     def train_step(self, o, r, d, a, sp_batch, weights):
