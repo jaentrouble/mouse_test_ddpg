@@ -57,7 +57,7 @@ def critic_dense_iqn(observation_space, action_space, encoder_f):
 
     action_input = keras.Input(action_space.shape,
                             name='action')
-    normalized_action = (action_input - action_middle)/action_range
+    normalized_action = (action_input - action_middle)*2/action_range
     encoded_state, encoder_inputs = encoder_f(observation_space)
     s = layers.Flatten(name='critic_flatten_state')(encoded_state)
     a = layers.Flatten(name='critic_flatten_action')(normalized_action)
