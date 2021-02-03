@@ -301,7 +301,7 @@ class Player():
             t_critic_input, 
             training=False,
         )
-        soft_target = target_support - self.soft_alpha * log_pi
+        soft_target = target_support - self.soft_alpha * log_pi[...,tf.newaxis]
         # Shape (batch, support)
         critic_target = r[...,tf.newaxis] + \
                         tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
