@@ -13,14 +13,14 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseUnity-v0'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
     ip='localhost',
     port = 7777,
 )
 
-model_f = am.unity_soft_res_iqn
+model_f = am.classic_soft
 
 evaluate_f = tools.evaluate_unity
 
@@ -44,8 +44,8 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].halt_steps = 0
-hp.lr['actor'].start = 1e-6
-hp.lr['actor'].end = 1e-6
+hp.lr['actor'].start = 1e-4
+hp.lr['actor'].end = 1e-4
 hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-2
 hp.lr['actor'].grad_clip = None
@@ -54,8 +54,8 @@ hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-5
+hp.lr['critic'].start = 1e-4
+hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-2
 hp.lr['critic'].grad_clip = None
@@ -79,7 +79,7 @@ hp.lr['alpha'].nsteps = int(hp.lr['alpha'].nsteps)
 # hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 # hp.OUP_CLIP = 0.8
 
-hp.Target_update_tau = 1e-3
+hp.Target_update_tau = 1e-1
 
 # For benchmark
 st = time.time()
