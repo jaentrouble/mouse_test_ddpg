@@ -18,7 +18,7 @@ ENVIRONMENT = 'Pendulum-v0'
 env_kwargs = dict(
 )
 
-model_f = am.classic_soft
+model_f = am.classic_model
 
 evaluate_f = tools.evaluate_unity
 
@@ -60,6 +60,8 @@ hp.lr['critic'].grad_clip = None
 
 hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
 hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
+
+hp.lr['critic2'] = hp.lr['critic']
 
 hp.lr['alpha'].halt_steps = 0
 hp.lr['alpha'].start = 1e-4

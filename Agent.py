@@ -99,6 +99,7 @@ class Player():
         self.models={
             'actor' : actor,
             'critic' : critic,
+            'critic2' : keras.models.clone_model(critic),
         }
         if m_dir is None :
             # compile models
@@ -284,10 +285,6 @@ class Player():
         """
         All inputs are expected to be preprocessed
         """
-        batch_size = tf.shape(a)[0]
-        tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
-        tau_inv = 1.0 - tau
-
         # next Q values from t_critic to evaluate
         # In Soft Actor Critic, current policy is used
         next_action, log_pi = self.models['actor'](sp_batch, training=False)
@@ -295,86 +292,99 @@ class Player():
         # add action, tau to input
         t_critic_input = sp_batch.copy()
         t_critic_input['action'] = next_action
-        t_critic_input['tau'] = tau
-        target_support = self.t_models['critic'](
+        target_q1 = self.t_models['critic'](
             t_critic_input, 
             training=False,
         )
-        soft_target = target_support - self.soft_alpha * log_pi[...,tf.newaxis]
-        # Shape (batch, support)
-        critic_target = r[...,tf.newaxis] + \
-                        tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
+        target_q2 = self.t_models['critic2'](
+            t_critic_input, 
+            training=False,
+        )
+        target_q_min = tf.minimum(target_q1, target_q2)
+        soft_target = target_q_min - self.soft_alpha * log_pi
+        critic_target = r + \
+                        tf.cast(tm.logical_not(d),tf.float32)*\
                         hp.Q_discount * \
                         soft_target
 
-        # First update critic
-        with tf.GradientTape() as critic_tape:
+        # First update critic1 & 2
+        with tf.GradientTape() as critic1_tape:
             # add action to input
-            critic_input = o.copy()
-            critic_input['action'] = a
-            critic_input['tau'] = tau
-            support = self.models['critic'](
-                critic_input,
+            critic1_input = o.copy()
+            critic1_input['action'] = a
+            q1 = self.models['critic'](
+                critic1_input,
                 training=True,
             )
-            # Shape (batch, support, support)
-            # One more final axis, because huber reduces one final axis
-            huber_loss = \
-                keras.losses.huber(critic_target[...,tf.newaxis,tf.newaxis],
-                                   support[:,tf.newaxis,:,tf.newaxis])
-            mask = (critic_target[...,tf.newaxis] -\
-                          support[:,tf.newaxis,:]) >= 0.0
-            tau_expand = tau[:,tf.newaxis,:]
-            tau_inv_expand = tau_inv[:,tf.newaxis,:]
-            raw_loss = tf.where(
-                mask, tau_expand * huber_loss, tau_inv_expand * huber_loss
-            )
-            # Shape (batch,)
-            critic_unweighted_loss = tf.reduce_mean(
-                tf.reduce_sum(raw_loss, axis=-1),
-                axis=-1
-            )
-            critic_loss = tf.math.reduce_mean(weights * critic_unweighted_loss)
-            critic_loss_original = critic_loss
+            critic1_unweighted_loss = tf.reduce_mean((critic_target-q1)**2)
+            critic1_loss = tf.math.reduce_mean(weights * critic1_unweighted_loss)
+            critic1_loss_original = critic1_loss
             if self.mixed_float:
-                critic_loss = self.models['critic'].optimizer.get_scaled_loss(
-                    critic_loss
+                critic1_loss = self.models['critic'].optimizer.get_scaled_loss(
+                    critic1_loss
                 )
+        with tf.GradientTape() as critic2_tape:
+            # add action to input
+            critic2_input = o.copy()
+            critic2_input['action'] = a
+            q2 = self.models['critic2'](
+                critic2_input,
+                training=True,
+            )
+            critic2_unweighted_loss = tf.reduce_mean((critic_target-q2)**2)
+            critic2_loss = tf.math.reduce_mean(weights * critic2_unweighted_loss)
+            critic2_loss_original = critic2_loss
+            if self.mixed_float:
+                critic2_loss = self.models['critic'].optimizer.get_scaled_loss(
+                    critic2_loss
+                )
+
         if self.total_steps % hp.log_per_steps==0:
-            tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
-            tf.summary.scalar('q', tf.math.reduce_mean(support), self.total_steps)
+            tf.summary.scalar('Critic Loss', critic1_loss_original, self.total_steps)
+            tf.summary.scalar('q', tf.math.reduce_mean(q1), self.total_steps)
             tf.summary.scalar('log_pi',tf.math.reduce_mean(log_pi),self.total_steps)
             
 
-        critic_vars = self.models['critic'].trainable_weights
-
-        critic_gradients = critic_tape.gradient(critic_loss, critic_vars)
+        critic1_vars = self.models['critic'].trainable_weights
+        critic1_gradients = critic1_tape.gradient(critic1_loss, critic1_vars)
         if self.mixed_float:
-            critic_gradients = \
+            critic1_gradients = \
                 self.models['critic'].optimizer.get_unscaled_gradients(
-                    critic_gradients
+                    critic1_gradients
                 )
-
         self.models['critic'].optimizer.apply_gradients(
-            zip(critic_gradients, critic_vars)
+            zip(critic1_gradients, critic1_vars)
         )
 
+        critic2_vars = self.models['critic2'].trainable_weights
+        critic2_gradients = critic2_tape.gradient(critic2_loss, critic2_vars)
+        if self.mixed_float:
+            critic2_gradients = \
+                self.models['critic2'].optimizer.get_unscaled_gradients(
+                    critic2_gradients
+                )
+        self.models['critic2'].optimizer.apply_gradients(
+            zip(critic2_gradients, critic2_vars)
+        )
+
+
         # Then update actor
-        tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
         with tf.GradientTape() as actor_tape:
             action, log_pi = self.models['actor'](o, training=True)
             # New input
             critic_input = o.copy()
             critic_input['action'] = action
-            critic_input['tau'] = tau
             # Shape (batch, support)
-            support = self.models['critic'](
+            q1 = self.models['critic'](
                 critic_input,
                 training=False,
             )
-            # In IQN, q is mean of all supports
-            q = tf.reduce_mean(support, axis=-1)
-            soft_q = q - self.soft_alpha * log_pi
+            q2 = self.models['critic2'](
+                critic_input,
+                training=False,
+            )
+            q_min = tf.minimum(q1, q2)
+            soft_q = q_min - self.soft_alpha * log_pi
             # Actor needs to 'ascend' gradient
             J = (-1.0) * tf.reduce_mean(soft_q)
             if self.mixed_float:
@@ -412,7 +422,7 @@ class Player():
 
         tf.summary.scalar(
             'critic_grad_norm',
-            tf.linalg.global_norm(critic_gradients),
+            tf.linalg.global_norm(critic1_gradients),
             step=self.total_steps,
         )
         tf.summary.scalar(
@@ -421,7 +431,8 @@ class Player():
             step=self.total_steps,
         )
 
-        priority = (critic_unweighted_loss+hp.Buf.epsilon)**hp.Buf.alpha
+        priority = ((critic1_unweighted_loss+critic2_unweighted_loss)/2\
+                    +hp.Buf.epsilon)**hp.Buf.alpha
         return priority
 
 
