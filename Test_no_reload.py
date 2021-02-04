@@ -16,8 +16,6 @@ from datetime import timedelta
 ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
-    ip='localhost',
-    port = 7777,
 )
 
 model_f = am.classic_soft
