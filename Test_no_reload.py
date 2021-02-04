@@ -18,7 +18,7 @@ ENVIRONMENT = 'Pendulum-v0'
 env_kwargs = dict(
 )
 
-model_f = am.classic_model
+model_f = am.classic_soft_naive
 
 evaluate_f = tools.evaluate_unity
 
