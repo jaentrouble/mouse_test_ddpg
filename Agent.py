@@ -316,7 +316,7 @@ class Player():
                 critic1_input,
                 training=True,
             )
-            critic1_unweighted_loss = tf.reduce_mean((critic_target-q1)**2)
+            critic1_unweighted_loss = (critic_target-q1)**2
             critic1_loss = tf.math.reduce_mean(weights * critic1_unweighted_loss)
             critic1_loss_original = critic1_loss
             if self.mixed_float:
@@ -331,7 +331,7 @@ class Player():
                 critic2_input,
                 training=True,
             )
-            critic2_unweighted_loss = tf.reduce_mean((critic_target-q2)**2)
+            critic2_unweighted_loss = (critic_target-q2)**2
             critic2_loss = tf.math.reduce_mean(weights * critic2_unweighted_loss)
             critic2_loss_original = critic2_loss
             if self.mixed_float:
