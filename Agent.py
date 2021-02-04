@@ -345,6 +345,7 @@ class Player():
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
             tf.summary.scalar('q', tf.math.reduce_mean(support), self.total_steps)
+            tf.summary.scalar('log_pi',tf.math.reduce_mean(log_pi),self.total_steps)
             
 
         critic_vars = self.models['critic'].trainable_weights
