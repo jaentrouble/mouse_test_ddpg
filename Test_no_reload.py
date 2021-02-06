@@ -108,24 +108,14 @@ if args.profile:
         if args.render :
             env.render()
     
-    # graph tracing
-    action = player.act(bef_o)
-    aft_o,r,d,i = env.step(action)
-    tf.summary.trace_on(graph=True, profiler=False)
-    player.step(bef_o,action,r,d,i)
-    tf.summary.trace_export(name='train_trace',step=0)
-    if d :
-        bef_o = env.reset()
-    else:
-        bef_o = aft_o
-    if args.render :
-        env.render()
-
     with Profile(f'logs/{args.log_name}'):
         for step in range(5):
             action = player.act(bef_o)
             aft_o,r,d,i = env.step(action)
-            player.step(bef_o,action,r,d,i)
+            if step == 0:
+                player.step(bef_o,action,r,d,i,trace=True)
+            else:
+                player.step(bef_o,action,r,d,i)
             if d :
                 bef_o = env.reset()
             else:

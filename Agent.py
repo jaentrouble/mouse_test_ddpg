@@ -452,7 +452,7 @@ class Player():
         return priority
 
 
-    def step(self, before, action, reward, done, info):
+    def step(self, before, action, reward, done, info, trace=False):
         self.buffer.store_step(before, action, reward, done)
         self.tqdm.update()
         # Record here, so that it won't record when evaluating
@@ -505,7 +505,12 @@ class Player():
                 weights,
             )
 
-            new_priors = self.train_step(*data).numpy()
+            if trace:
+                tf.summary.trace_on(graph=True, profiler=False)
+            raw_priors = self.train_step(*data)
+            if trace:
+                tf.summary.trace_export(name='train_trace',step=0)
+            new_priors = raw_priors.numpy()
             self.buffer.update_prior_batch(indices, new_priors)
 
             # Soft target update
