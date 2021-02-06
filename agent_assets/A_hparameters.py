@@ -42,7 +42,7 @@ lr['encoder'].epsilon = 1e-2
 lr['encoder'].grad_clip = 1.0
 
 lr['forward'] = lr['encoder']
-lr['inverse'] = lr['inverse']
+lr['inverse'] = lr['encoder']
 
 OUP_damping = 0.15
 OUP_stddev_start=0.2
