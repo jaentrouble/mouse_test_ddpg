@@ -12,6 +12,7 @@ import os
 import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
+from functools import partial
 
 ENVIRONMENT = 'Pendulum-v0'
 
@@ -21,6 +22,7 @@ env_kwargs = dict(
 model_f = am.classic_iqn_icm
 
 evaluate_f = tools.evaluate_common
+evaluate_f = partial(tools.evaluate_common,fps=30)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
