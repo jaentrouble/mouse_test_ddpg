@@ -247,6 +247,7 @@ class Player():
             return action_np
 
 
+    @tf.function
     def oup_noise(self, action):
         """
         Add Ornstein-Uhlenbeck noise to action
@@ -264,7 +265,24 @@ class Player():
             self.action_space.low,
             self.action_space.high,
         )
+        return noised_action
 
+    @tf.function
+    def normal_noise(self, action):
+        """
+        Add Normal noise to action (independent to past noise)
+        """
+        noise = tf.random.normal(
+            shape=self.action_shape,
+            mean=0.0,
+            stddev = self.oup_stddev
+        )*self.action_range
+        noised_action = action + noise
+        noised_action = tf.clip_by_value(
+            noised_action,
+            self.action_space.low,
+            self.action_space.high,
+        )
         return noised_action
 
     @tf.function
@@ -333,7 +351,7 @@ class Player():
 
         # next Q values from t_critic to evaluate
         t_action_raw = self.t_models['actor'](sp_batch, training=False)
-        t_action = self.oup_noise(t_action_raw)
+        t_action = self.normal_noise(t_action_raw)
 
         # add action, tau to input
         t_critic_input = sp_batch.copy()
