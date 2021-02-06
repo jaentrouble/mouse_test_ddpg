@@ -202,20 +202,6 @@ class Player():
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
         noised_action = self.oup_noise(raw_action)
-        if tf.random.uniform(())<hp.OUP_clip:
-            raw_action = tf.clip_by_value(
-                raw_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-            noised_action = self.oup_noise(raw_action)
-            noised_action = tf.clip_by_value(
-                noised_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-        else:
-            noised_action = self.oup_noise(raw_action)
         return noised_action
 
     @tf.function
@@ -273,7 +259,14 @@ class Player():
                     stddev=self.oup_stddev,
                 )*self.action_range
         self.last_oup = noise
-        return action + noise
+        noised_action = action + noise
+        noised_action = tf.clip_by_value(
+            noised_action,
+            self.action_space.low,
+            self.action_space.high,
+        )
+
+        return noised_action
 
     @tf.function
     def train_step(self, o, r, d, a, sp_batch, weights):
@@ -340,7 +333,9 @@ class Player():
         tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
-        t_action = self.t_models['actor'](sp_batch, training=False)
+        t_action_raw = self.t_models['actor'](sp_batch, training=False)
+        t_action = self.oup_noise(t_action_raw)
+
         # add action, tau to input
         t_critic_input = sp_batch.copy()
         t_critic_input['action'] = t_action
@@ -452,7 +447,7 @@ class Player():
         return priority
 
 
-    def step(self, before, action, reward, done, info, trace=False):
+    def step(self, before, action, reward, done, info):
         self.buffer.store_step(before, action, reward, done)
         self.tqdm.update()
         # Record here, so that it won't record when evaluating
@@ -505,12 +500,7 @@ class Player():
                 weights,
             )
 
-            if trace:
-                tf.summary.trace_on(graph=True, profiler=False)
-            raw_priors = self.train_step(*data)
-            if trace:
-                tf.summary.trace_export(name='train_trace',step=0)
-            new_priors = raw_priors.numpy()
+            new_priors = self.train_step(*data).numpy()
             self.buffer.update_prior_batch(indices, new_priors)
 
             # Soft target update
