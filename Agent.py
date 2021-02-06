@@ -203,20 +203,6 @@ class Player():
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
             tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         noised_action = self.oup_noise(raw_action)
-        if tf.random.uniform(())<hp.OUP_clip:
-            raw_action = tf.clip_by_value(
-                raw_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-            noised_action = self.oup_noise(raw_action)
-            noised_action = tf.clip_by_value(
-                noised_action,
-                self.action_space.low,
-                self.action_space.high,
-            )
-        else:
-            noised_action = self.oup_noise(raw_action)
         return noised_action
 
     @tf.function
@@ -276,7 +262,31 @@ class Player():
                     stddev=self.oup_stddev,
                 )*self.action_range
         self.last_oup = noise
-        return action + noise
+        noised_action = action + noise
+        noised_action = tf.clip_by_value(
+            noised_action,
+            self.action_space.low,
+            self.action_space.high,
+        )
+        return noised_action
+
+    @tf.function
+    def normal_noise(self, action):
+        """
+        Add Normal noise to action (independent to past noise)
+        """
+        noise = tf.random.normal(
+            shape=self.action_shape,
+            mean=0.0,
+            stddev = self.oup_stddev
+        )*self.action_range
+        noised_action = action + noise
+        noised_action = tf.clip_by_value(
+            noised_action,
+            self.action_space.low,
+            self.action_space.high,
+        )
+        return noised_action
 
     @tf.function
     def train_step(self, o, r, d, a, sp_batch, weights):
@@ -284,7 +294,6 @@ class Player():
         All inputs are expected to be preprocessed
         """
         batch_size = tf.shape(a)[0]
-
         # Update Inverse
         with tf.GradientTape() as inverse_tape:
             f_s = self.models['encoder'](o, training=True)
@@ -344,7 +353,9 @@ class Player():
         tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
-        t_action = self.t_models['actor'](sp_batch, training=False)
+        t_action_raw = self.t_models['actor'](sp_batch, training=False)
+        t_action = self.normal_noise(t_action_raw)
+
         # add action, tau to input
         t_critic_input = sp_batch.copy()
         t_critic_input['action'] = t_action
@@ -396,7 +407,6 @@ class Player():
             tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
             tf.summary.scalar('q', tf.math.reduce_mean(support), self.total_steps)
             tf.summary.scalar('Max_r_i',tf.reduce_max(r_intrinsic), self.total_steps)
-            
 
         critic_vars = self.models['critic'].trainable_weights
 
