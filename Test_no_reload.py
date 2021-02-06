@@ -20,7 +20,7 @@ env_kwargs = dict(
 
 model_f = am.classic_iqn_icm
 
-evaluate_f = tools.evaluate_unity
+evaluate_f = tools.evaluate_common
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
