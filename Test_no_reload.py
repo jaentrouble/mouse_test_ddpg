@@ -80,7 +80,7 @@ st = time.time()
 
 need_to_eval = False
 
-env = gym.make(ENVIRONMENT, **env_kwargs)
+env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 bef_o = env.reset()
 
 player = Player(
