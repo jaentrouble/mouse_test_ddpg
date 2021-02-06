@@ -97,7 +97,7 @@ def encoder_simple_res(observation_space):
         strides=2,
         name='encoder_bottleneck3'
     )(x)
-    outputs = layers.GlobalMaxPool2D(name='encoder_pool')(x)
+    outputs = layers.GlobalMaxPool2D(name='encoder_pool',dtype='float32')(x)
     return outputs, [inputs]
 
     

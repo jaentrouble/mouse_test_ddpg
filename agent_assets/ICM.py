@@ -24,11 +24,11 @@ def ICM_dense(observation_space, action_space, encoder_f):
 
     # Inverse Model
     feature_s_input = keras.Input(
-        tensor=encoded_state, 
+        tf.shape(encoded_state)[1:], 
         name='s_feature'
     )
     feature_sp_input = keras.Input(
-        tensor=encoded_state,
+        tf.shape(encoded_state)[1:], 
         name='sp_feature'
     )
     flattened_s = layers.Flatten(name='inverse_s_flatten')(
@@ -57,7 +57,7 @@ def ICM_dense(observation_space, action_space, encoder_f):
         name='action'
     )
     feature_s_input = keras.Input(
-        tensor=encoded_state, 
+        tf.shape(encoded_state)[1:], 
         name='s_feature'
     )
     flattened_a = layers.Flatten(name='forward_a_flatten')(
