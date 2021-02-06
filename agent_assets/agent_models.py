@@ -4,6 +4,7 @@ from tensorflow.keras import layers
 from . import critic_models as cm
 from . import encoder_models as em
 from . import actor_models as am
+from . import ICM
 """
 Actor-Critic agent model
 Agent functions return two models:
@@ -55,6 +56,17 @@ def unity_res_iqn(observation_space, action_space):
     critic = cm.critic_dense_iqn(observation_space, action_space, encoder_f)
 
     return actor, critic
+
+def unity_res_iqn_icm(observation_space, action_space):
+    encoder_f = em.encoder_simple_res
+
+    actor = am.actor_simple_dense(observation_space, action_space, encoder_f)
+
+    critic = cm.critic_dense_iqn(observation_space, action_space, encoder_f)
+
+    icm_models = ICM.ICM_dense(observation_space, action_space, encoder_f)
+
+    return actor, critic, icm_models
 
 if __name__ == '__main__':
     from gym.spaces import Dict, Box

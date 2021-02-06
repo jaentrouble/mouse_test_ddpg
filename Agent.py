@@ -83,51 +83,40 @@ class Player():
         self.last_oup = 0
 
         #Inputs
-        if m_dir is None :
-            actor, critic = model_f(observation_space, action_space)
-            self.models={
-                'actor' : actor,
-                'critic' : critic,
-            }
-            # compile models
-            for name, model in self.models.items():
-                lr = tf.function(partial(self._lr, name))
-                optimizer = keras.optimizers.Adam(
-                    learning_rate=lr,
-                    epsilon=hp.lr[name].epsilon,
-                    global_clipnorm=hp.lr[name].grad_clip,
-                )
-                if self.mixed_float:
-                    optimizer = mixed_precision.LossScaleOptimizer(
-                        optimizer
-                    )
-                model.compile(optimizer=optimizer)
-        else:
-            actor, critic = model_f(observation_space, action_space)
-            self.models={
-                'actor' : actor,
-                'critic' : critic,
-            }
-            # compile models
-            for name, model in self.models.items():
-                lr = tf.function(partial(self._lr, name))
-                optimizer = keras.optimizers.Adam(
-                    learning_rate=lr,
-                    epsilon=hp.lr[name].epsilon,
-                    global_clipnorm=hp.lr[name].grad_clip,
-                )
-                if self.mixed_float:
-                    optimizer = mixed_precision.LossScaleOptimizer(
-                        optimizer
-                    )
-                model.compile(optimizer=optimizer)
-                model.load_weights(path.join(m_dir,name))
-            print('model loaded')
-        self.t_models = {}
+        actor, critic, icm_models = model_f(observation_space, action_space)
+        encoder, inverse, forward = icm_models
+        self.models={
+            'actor' : actor,
+            'critic' : critic,
+            'encoder' : encoder,
+            'inverse' : inverse,
+            'forward' : forward,
+        }
+        targets = ['actor', 'critic']
+
         for name, model in self.models.items():
+            lr = tf.function(partial(self._lr, name))
+            optimizer = keras.optimizers.Adam(
+                learning_rate=lr,
+                epsilon=hp.lr[name].epsilon,
+                global_clipnorm=hp.lr[name].grad_clip,
+            )
+            if self.mixed_float:
+                optimizer = mixed_precision.LossScaleOptimizer(
+                    optimizer
+                )
+            model.compile(optimizer=optimizer)
+            model.summary()
+        if m_dir is not None:
+            for name, model in self.models.items():
+                model.load_weights(path.join(m_dir,name))
+            print(f'model loaded : {m_dir}')
+
+        self.t_models = {}
+        for name in targets:
+            model = self.models[name]
             self.t_models[name] = keras.models.clone_model(model)
             self.t_models[name].set_weights(model.get_weights())
-            model.summary()
 
         self.buffer = ReplayBuffer(hp.Buffer_size, self.observation_space,
                                     self.action_space)
@@ -167,7 +156,7 @@ class Player():
 
     def _lr(self, name):
         effective_steps = self.total_steps - hp.Learn_start\
-                                           - hp.lr[name].halt_steps
+                                           - int(hp.lr[name].halt_steps)
         if tf.greater(effective_steps, int(hp.lr[name].nsteps)):
             return hp.lr[name].end
         elif tf.less(effective_steps, 0):
@@ -294,6 +283,59 @@ class Player():
         """
         All inputs are expected to be preprocessed
         """
+        # Update Inverse
+        with tf.GradientTape() as inverse_tape:
+            f_s = self.models['encoder'](o, training=True)
+            f_sp = self.models['encoder'](sp_batch, training=True)
+            a_pred = self.models['inverse']([f_s, f_sp], training=True)
+            inverse_loss = tf.reduce_mean(tf.square(a_pred-a))
+            if self.mixed_float:
+                inverse_loss = self.models['inverse']\
+                                   .optimizer\
+                                   .get_scaled_loss(inverse_loss)
+        encoder_vars = self.models['encoder'].trainable_weights
+        inverse_vars = self.models['inverse'].trainable_weights
+        concat_vars = encoder_vars + inverse_vars
+
+        concat_gradients = inverse_tape.gradient(inverse_loss, concat_vars)
+        if self.mixed_float:
+            concat_gradients = self.models['inverse']\
+                                   .optimizer\
+                                   .get_unscaled_gradients(concat_gradients)
+        
+        self.models['encoder'].optimizer.apply_gradients(
+            zip(concat_gradients[:len(encoder_vars)], encoder_vars)
+        )
+        self.models['inverse'].optimizer.apply_gradients(
+            zip(concat_gradients[len(encoder_vars):], inverse_vars)
+        )
+
+        # Update forward with updated encoder
+        f_sp = self.models['encoder'](sp_batch, training=False)
+        with tf.GradientTape() as forward_tape:
+            f_s = self.models['encoder'](o, training=False)
+            f_sp_pred = self.models['forward']([a, f_s])
+            # Leave batch axis
+            r_intrinsic = tf.losses.mse(f_sp, f_sp_pred)
+            forward_loss = tf.reduce_mean(r_intrinsic)
+            if self.mixed_float:
+                forward_loss = self.models['forward']\
+                                   .optimizer\
+                                   .get_scaled_loss(forward_loss)
+        forward_vars = self.models['forward'].trainable_weights
+        
+        forward_gradients = forward_tape.gradient(forward_loss, forward_vars)
+        if self.mixed_float:
+            forward_gradients = self.models['forward']\
+                                    .optimizer\
+                                    .get_unscaled_gradients(forward_gradients)
+        
+        self.models['forward'].optimizer.apply_gradients(
+            zip(forward_gradients, forward_vars)
+        )
+
+        r += hp.ICM_intrinsic * r_intrinsic
+
         batch_size = tf.shape(a)[0]
         tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
         tau_inv = 1.0 - tau

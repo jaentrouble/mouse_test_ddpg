@@ -18,6 +18,7 @@ class Lr():
 lr = {
     'actor' : Lr(),
     'critic' : Lr(),
+    'encoder' : Lr(),
 }
 lr['actor'].halt_steps = 0
 lr['actor'].start = 0.001
@@ -33,6 +34,15 @@ lr['critic'].nsteps = 2000000
 lr['critic'].epsilon = 1e-2
 lr['critic'].grad_clip = 1.0
 
+lr['encoder'].halt_steps = 0
+lr['encoder'].start = 1e-4
+lr['encoder'].end = 1e-5
+lr['encoder'].nsteps = 1e6
+lr['encoder'].epsilon = 1e-2
+lr['encoder'].grad_clip = 1.0
+
+lr['forward'] = lr['encoder']
+lr['inverse'] = lr['inverse']
 
 OUP_damping = 0.15
 OUP_stddev_start=0.2
@@ -42,6 +52,8 @@ OUP_clip = 0.8
 
 IQN_SUPPORT = 64
 IQN_COS_EMBED = 64
+
+ICM_intrinsic = 1.0
 
 class _Buf():
     def __init__(self):

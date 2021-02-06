@@ -50,9 +50,6 @@ hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-2
 hp.lr['actor'].grad_clip = 0.5
 
-hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
-hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
-
 hp.lr['critic'].halt_steps = 0
 hp.lr['critic'].start = 1e-5
 hp.lr['critic'].end = 1e-5
@@ -60,8 +57,15 @@ hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-2
 hp.lr['critic'].grad_clip = None
 
-hp.lr['critic'].halt_steps = int(hp.lr['critic'].halt_steps)
-hp.lr['critic'].nsteps = int(hp.lr['critic'].nsteps)
+hp.lr['encoder'].halt_steps = 0
+hp.lr['encoder'].start = 1e-4
+hp.lr['encoder'].end = 1e-5
+hp.lr['encoder'].nsteps = 1e6
+hp.lr['encoder'].epsilon = 1e-2
+hp.lr['encoder'].grad_clip = None
+
+hp.lr['forward'] = hp.lr['encoder']
+hp.lr['inverse'] = hp.lr['inverse']
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
