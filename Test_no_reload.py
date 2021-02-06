@@ -43,21 +43,21 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].halt_steps = 0
-hp.lr['actor'].start = 1e-5
+hp.lr['actor'].start = 1e-4
 hp.lr['actor'].end = 1e-5
 hp.lr['actor'].nsteps = 1e6
-hp.lr['actor'].epsilon = 1e-2
-hp.lr['actor'].grad_clip = 0.5
+hp.lr['actor'].epsilon = 1e-7
+hp.lr['actor'].grad_clip = None
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-4
+hp.lr['critic'].start = 1e-3
 hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 1e6
-hp.lr['critic'].epsilon = 1e-2
+hp.lr['critic'].epsilon = 1e-7
 hp.lr['critic'].grad_clip = None
 
 hp.lr['encoder'].halt_steps = 0
-hp.lr['encoder'].start = 1e-4
+hp.lr['encoder'].start = 1e-5
 hp.lr['encoder'].end = 1e-5
 hp.lr['encoder'].nsteps = 1e6
 hp.lr['encoder'].epsilon = 1e-2
@@ -67,12 +67,14 @@ hp.lr['forward'] = hp.lr['encoder']
 hp.lr['inverse'] = hp.lr['encoder']
 
 hp.OUP_stddev_start = 1.0
-hp.OUP_stddev_end = 0.2
-hp.OUP_stddev_nstep = 2e5
+hp.OUP_stddev_end = 0.05
+hp.OUP_stddev_nstep = 3e4
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 hp.OUP_CLIP = 0.8
 
-hp.Target_update_tau = 1e-3
+hp.Target_update_tau = 1e-1
+
+hp.ICM_intrinsic = 1.0
 
 # For benchmark
 st = time.time()
