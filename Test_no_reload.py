@@ -13,14 +13,12 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseUnity-v0'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
-    ip='localhost',
-    port = 7777,
 )
 
-model_f = am.unity_res_iqn
+model_f = am.classic_iqn_icm
 
 evaluate_f = tools.evaluate_unity
 
