@@ -247,7 +247,6 @@ class Player():
             return action_np
 
 
-    @tf.function
     def oup_noise(self, action):
         """
         Add Ornstein-Uhlenbeck noise to action
