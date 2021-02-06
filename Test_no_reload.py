@@ -65,7 +65,7 @@ hp.lr['encoder'].epsilon = 1e-2
 hp.lr['encoder'].grad_clip = None
 
 hp.lr['forward'] = hp.lr['encoder']
-hp.lr['inverse'] = hp.lr['inverse']
+hp.lr['inverse'] = hp.lr['encoder']
 
 hp.OUP_stddev_start = 1.0
 hp.OUP_stddev_end = 0.2
