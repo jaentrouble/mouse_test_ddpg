@@ -201,7 +201,6 @@ class Player():
         raw_action = self.models['actor'](processed_state, training=False)
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
-        noised_action = self.oup_noise(raw_action)
         if tf.random.uniform(())<hp.OUP_clip:
             raw_action = tf.clip_by_value(
                 raw_action,
@@ -452,7 +451,7 @@ class Player():
         return priority
 
 
-    def step(self, before, action, reward, done, info, trace=False):
+    def step(self, before, action, reward, done, info):
         self.buffer.store_step(before, action, reward, done)
         self.tqdm.update()
         # Record here, so that it won't record when evaluating
@@ -505,12 +504,7 @@ class Player():
                 weights,
             )
 
-            if trace:
-                tf.summary.trace_on(graph=True, profiler=False)
-            raw_priors = self.train_step(*data)
-            if trace:
-                tf.summary.trace_export(name='train_trace',step=0)
-            new_priors = raw_priors.numpy()
+            new_priors = self.train_step(*data).numpy()
             self.buffer.update_prior_batch(indices, new_priors)
 
             # Soft target update

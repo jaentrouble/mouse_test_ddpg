@@ -112,10 +112,7 @@ if args.profile:
         for step in range(5):
             action = player.act(bef_o)
             aft_o,r,d,i = env.step(action)
-            if step == 0:
-                player.step(bef_o,action,r,d,i,trace=True)
-            else:
-                player.step(bef_o,action,r,d,i)
+            player.step(bef_o,action,r,d,i)
             if d :
                 bef_o = env.reset()
             else:
