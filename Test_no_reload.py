@@ -48,7 +48,7 @@ hp.lr['actor'].start = 1e-6
 hp.lr['actor'].end = 1e-6
 hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-2
-hp.lr['actor'].grad_clip = None
+hp.lr['actor'].grad_clip = 0.1
 
 hp.lr['actor'].halt_steps = int(hp.lr['actor'].halt_steps)
 hp.lr['actor'].nsteps = int(hp.lr['actor'].nsteps)
