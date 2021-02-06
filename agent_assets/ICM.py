@@ -24,11 +24,11 @@ def ICM_dense(observation_space, action_space, encoder_f):
 
     # Inverse Model
     feature_s_input = keras.Input(
-        tensor=encoded_state, 
+        encoded_state.shape[1:], 
         name='s_feature'
     )
     feature_sp_input = keras.Input(
-        tensor=encoded_state,
+        encoded_state.shape[1:], 
         name='sp_feature'
     )
     flattened_s = layers.Flatten(name='inverse_s_flatten')(
@@ -57,14 +57,14 @@ def ICM_dense(observation_space, action_space, encoder_f):
         name='action'
     )
     feature_s_input = keras.Input(
-        tensor=encoded_state, 
+        encoded_state.shape[1:], 
         name='s_feature'
     )
     flattened_a = layers.Flatten(name='forward_a_flatten')(
                                     action_input)
     flattened_s = layers.Flatten(name='forward_s_flatten')(
                                     feature_s_input)
-    feature_num = tf.shape(flattened_s)[-1]
+    feature_num = flattened_s.shape[-1]
     concated_inputs = layers.Concatenate(name='forward_concat')(
         [flattened_a, flattened_s]
     )
@@ -73,7 +73,7 @@ def ICM_dense(observation_space, action_space, encoder_f):
     f_x = layers.Dense(256, activation='relu',
                         name='forward_Dense2')(f_x)
     f_x = layers.Dense(feature_num, name='forward_Dense3')(f_x)
-    f_x = layers.Reshape(tf.shape(feature_s_input)[1:],
+    f_x = layers.Reshape(encoded_state.shape[1:],
                          name='forward_reshape')(f_x)
     forward_outputs = layers.Activation('linear',dtype='float32')(f_x)
     forward_model = keras.Model(
