@@ -283,6 +283,8 @@ class Player():
         """
         All inputs are expected to be preprocessed
         """
+        batch_size = tf.shape(a)[0]
+
         # Update Inverse
         with tf.GradientTape() as inverse_tape:
             f_s = self.models['encoder'](o, training=True)
@@ -316,7 +318,9 @@ class Player():
             f_s = self.models['encoder'](o, training=False)
             f_sp_pred = self.models['forward']([a, f_s])
             # Leave batch axis
-            r_intrinsic = tf.losses.mse(f_sp, f_sp_pred)
+            f_sp_flat = tf.reshape(f_sp,(batch_size, -1))
+            f_sp_pred_flat = tf.reshape(f_sp_pred,(batch_size, -1))
+            r_intrinsic = tf.losses.mse(f_sp_flat, f_sp_pred_flat)
             forward_loss = tf.reduce_mean(r_intrinsic)
             if self.mixed_float:
                 forward_loss = self.models['forward']\
@@ -336,7 +340,6 @@ class Player():
 
         r += hp.ICM_intrinsic * r_intrinsic
 
-        batch_size = tf.shape(a)[0]
         tau = tf.random.uniform([batch_size, hp.IQN_SUPPORT])
         tau_inv = 1.0 - tau
 
