@@ -8,11 +8,10 @@ from agent_assets import tools
 import agent_assets.A_hparameters as hp
 from tqdm import tqdm
 import argparse
-import os
-import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 from functools import partial
+import tensorflow as tf
 
 ENVIRONMENT = 'Pendulum-v0'
 
@@ -108,6 +107,19 @@ if args.profile:
             bef_o = aft_o
         if args.render :
             env.render()
+    
+    # graph tracing
+    action = player.act(bef_o)
+    aft_o,r,d,i = env.step(action)
+    tf.summary.trace_on(graph=True, profiler=False)
+    player.step(bef_o,action,r,d,i)
+    tf.summary.trace_export(name='train_trace',step=0)
+    if d :
+        bef_o = env.reset()
+    else:
+        bef_o = aft_o
+    if args.render :
+        env.render()
 
     with Profile(f'logs/{args.log_name}'):
         for step in range(5):
