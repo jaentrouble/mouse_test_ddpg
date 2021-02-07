@@ -72,7 +72,7 @@ hp.OUP_stddev_end = 0.2
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
 
-hp.ICM_intrinsic = 1.0
+hp.ICM_intrinsic = 5e-2
 
 hp.Target_update_tau = 1e-3
 
