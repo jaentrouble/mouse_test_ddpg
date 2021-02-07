@@ -50,8 +50,8 @@ hp.lr['actor'].epsilon = 1e-7
 hp.lr['actor'].grad_clip = None
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-3
-hp.lr['critic'].end = 1e-4
+hp.lr['critic'].start = 5e-4
+hp.lr['critic'].end = 5e-5
 hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-7
 hp.lr['critic'].grad_clip = None
@@ -76,7 +76,7 @@ hp.Target_update_tau = 1e-1
 
 hp.ICM_intrinsic = 1.0
 
-hp.Buf.N = 2
+hp.Buf.N = 4
 
 # For benchmark
 st = time.time()
