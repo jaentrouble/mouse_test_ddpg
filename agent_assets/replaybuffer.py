@@ -132,7 +132,7 @@ class ReplayBuffer():
         done_sample = self.done_buffer[indices]
         for n in range(1,hp.Buf.N):
             indices_ = (indices + n) % self.size
-            reward_sample += done_sample\
+            reward_sample += np.logical_not(done_sample)\
                             *(hp.Q_discount**n)\
                             *self.reward_buffer[indices_]
             done_sample = np.logical_or(
