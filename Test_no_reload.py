@@ -51,15 +51,15 @@ hp.lr['actor'].epsilon = 1e-3
 hp.lr['actor'].grad_clip = None
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-5
+hp.lr['critic'].start = 1e-4
+hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-3
 hp.lr['critic'].grad_clip = None
 
 hp.lr['encoder'].halt_steps = 0
-hp.lr['encoder'].start = 1e-4
-hp.lr['encoder'].end = 1e-4
+hp.lr['encoder'].start = 1e-3
+hp.lr['encoder'].end = 1e-3
 hp.lr['encoder'].nsteps = 1e6
 hp.lr['encoder'].epsilon = 1e-5
 hp.lr['encoder'].grad_clip = None
