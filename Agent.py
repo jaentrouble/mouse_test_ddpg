@@ -286,7 +286,7 @@ class Player():
         return noised_action
 
     @tf.function
-    def train_step(self, o, r, d, a, sp_batch, weights):
+    def train_step(self, o, r, d, a, sp_batch, sn_batch, weights):
         """
         All inputs are expected to be preprocessed
         """
@@ -350,11 +350,11 @@ class Player():
         tau_inv = 1.0 - tau
 
         # next Q values from t_critic to evaluate
-        t_action_raw = self.t_models['actor'](sp_batch, training=False)
+        t_action_raw = self.t_models['actor'](sn_batch, training=False)
         t_action = self.normal_noise(t_action_raw)
 
         # add action, tau to input
-        t_critic_input = sp_batch.copy()
+        t_critic_input = sn_batch.copy()
         t_critic_input['action'] = t_action
         t_critic_input['tau'] = tau
         target_support = self.t_models['critic'](
@@ -501,10 +501,11 @@ class Player():
             if self.start_training == False:
                 self.tqdm.set_description()
                 self.start_training = True
-            s_batch, a_batch, r_batch, d_batch, sp_batch, indices, weights = \
-                                    self.buffer.sample(hp.Batch_size)
+            s_batch, a_batch, r_batch, d_batch, sp_batch, sn_batch, \
+                     indices, weights = self.buffer.sample(hp.Batch_size)
             s_batch = self.pre_processing(s_batch)
             sp_batch = self.pre_processing(sp_batch)
+            sn_batch = self.pre_processing(sn_batch)
             # tf_total_steps = tf.constant(self.total_steps, dtype=tf.int64)
             weights = tf.convert_to_tensor(weights, dtype=tf.float32)
 
@@ -513,7 +514,8 @@ class Player():
                 r_batch, 
                 d_batch, 
                 a_batch, 
-                sp_batch, 
+                sp_batch,
+                sn_batch,
                 weights,
             )
 

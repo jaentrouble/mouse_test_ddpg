@@ -121,12 +121,15 @@ class ReplayBuffer():
 
     def sample(self, batch_size):
         indices = self._to_data_idx(self._sample_indices(batch_size))
-        next_indices = (indices + hp.Buf.N) % self.size
+        next_indices = (indices + 1) % self.size
+        nth_indices = (indices + hp.Buf.N) % self.size
         obs_sample = {}
         next_obs_sample = {}
+        nth_obs_sample = {}
         for name, buf in self.obs_buffer.items():
             obs_sample[name] = buf[indices]
             next_obs_sample[name] = buf[next_indices]
+            nth_obs_sample[name] = buf[nth_indices]
         action_sample = self.action_buffer[indices]
         reward_sample = self.reward_buffer[indices]
         done_sample = self.done_buffer[indices]
@@ -150,6 +153,7 @@ class ReplayBuffer():
                 reward_sample, 
                 done_sample,
                 next_obs_sample,
+                nth_obs_sample,
                 indices,
                 IS_weights,
                 )
