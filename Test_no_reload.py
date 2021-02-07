@@ -76,6 +76,8 @@ hp.Target_update_tau = 1e-1
 
 hp.ICM_intrinsic = 1.0
 
+hp.Buf.N = 5
+
 # For benchmark
 st = time.time()
 

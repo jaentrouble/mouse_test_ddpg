@@ -364,7 +364,7 @@ class Player():
         # Shape (batch, support)
         critic_target = r[...,tf.newaxis] + \
                         tf.cast(tm.logical_not(d),tf.float32)[...,tf.newaxis]*\
-                        hp.Q_discount * \
+                        (hp.Q_discount**hp.Buf.N) * \
                         target_support
 
         # First update critic

@@ -60,6 +60,7 @@ class _Buf():
         self.alpha = 0.6
         self.beta = 0.4
         self.epsilon = 1e-3
+        self.N = 5
 
 Buf = _Buf()
 
