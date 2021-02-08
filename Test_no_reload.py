@@ -13,16 +13,14 @@ import sys
 from tensorflow.profiler.experimental import Profile
 from datetime import timedelta
 
-ENVIRONMENT = 'mouseUnity-v0'
+ENVIRONMENT = 'Pendulum-v0'
 
 env_kwargs = dict(
-    ip='localhost',
-    port = 7777,
 )
 
-model_f = am.unity_conv_iqn_icm
+model_f = am.classic_iqn_icm
 
-evaluate_f = tools.evaluate_unity
+evaluate_f = tools.evaluate_common
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--render', dest='render',action='store_true', default=False)
@@ -44,22 +42,22 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].halt_steps = 0
-hp.lr['actor'].start = 5e-6
-hp.lr['actor'].end = 5e-6
+hp.lr['actor'].start = 1e-4
+hp.lr['actor'].end = 1e-4
 hp.lr['actor'].nsteps = 1e6
-hp.lr['actor'].epsilon = 1e-3
+hp.lr['actor'].epsilon = 1e-5
 hp.lr['actor'].grad_clip = None
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-5
+hp.lr['critic'].start = 5e-4
+hp.lr['critic'].end = 5e-4
 hp.lr['critic'].nsteps = 1e6
-hp.lr['critic'].epsilon = 1e-3
+hp.lr['critic'].epsilon = 1e-5
 hp.lr['critic'].grad_clip = None
 
 hp.lr['encoder'].halt_steps = 0
-hp.lr['encoder'].start = 1e-5
-hp.lr['encoder'].end = 1e-5
+hp.lr['encoder'].start = 1e-3
+hp.lr['encoder'].end = 1e-3
 hp.lr['encoder'].nsteps = 1e6
 hp.lr['encoder'].epsilon = 1e-5
 hp.lr['encoder'].grad_clip = None
@@ -78,7 +76,7 @@ hp.IQN_ENABLE = True
 hp.ICM_ENABLE = True
 hp.ICM_intrinsic = 1.0
 
-hp.Target_update_tau = 1e-3
+hp.Target_update_tau = 1e-1
 
 hp.Buf.N = 5
 
@@ -87,7 +85,7 @@ st = time.time()
 
 need_to_eval = False
 
-env = gym.make(ENVIRONMENT, **env_kwargs)
+env = tools.EnvWrapper(gym.make(ENVIRONMENT, **env_kwargs))
 bef_o = env.reset()
 
 player = Player(
