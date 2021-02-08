@@ -589,9 +589,9 @@ class Player():
 
             # Soft target update
             if self.total_steps % hp.Target_update == 0:
-                for model, t_model in zip(
-                    self.models.values(),self.t_models.values()
-                ):
+                for t_model_name in self.t_models:
+                    model = self.models[t_model_name]
+                    t_model = self.t_models[t_model_name]
                     model_w = model.get_weights()
                     t_model_w = t_model.get_weights()
                     new_w = []
@@ -616,9 +616,6 @@ class Player():
         for name, model in self.models.items():
             weight_dir = path.join(self.model_dir,name)
             model.save_weights(weight_dir)
-        # print('saving buffer..')
-        # with open(path.join(self.model_dir,'buffer.bin'),'wb') as f :
-        #     pickle.dump(self.buffer, f)
 
         return self.save_count
 
