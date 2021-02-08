@@ -207,7 +207,6 @@ class Player():
         raw_action = self.models['actor'](processed_state, training=False)
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('a0_raw', raw_action[0][0], self.total_steps)
-            tf.summary.scalar('a1_raw', raw_action[0][1], self.total_steps)
         noised_action = self.oup_noise(raw_action)
         return noised_action
 
@@ -244,12 +243,10 @@ class Player():
         if action_np.shape[0] == 1:
             if self.total_steps % hp.log_per_steps==0 and not evaluate:
                 tf.summary.scalar('a0', action[0][0], self.total_steps)
-                tf.summary.scalar('a1', action[0][1], self.total_steps)
             return action_np[0]
         else:
             if self.total_steps % hp.log_per_steps==0 and not evaluate:
                 tf.summary.scalar('a0', action[0], self.total_steps)
-                tf.summary.scalar('a1', action[1], self.total_steps)
             return action_np
 
 
