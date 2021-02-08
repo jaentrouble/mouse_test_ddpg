@@ -264,6 +264,11 @@ class Player():
                     mean=0.0,
                     stddev=self.oup_stddev,
                 )*self.action_range
+        noise = tf.clip_by_value(
+            noise,
+            -hp.OUP_noise_max*self.action_range/2,
+            hp.OUP_noise_max*self.action_range/2,
+        )
         self.last_oup = noise
         noised_action = action + noise
         noised_action = tf.clip_by_value(
@@ -283,6 +288,11 @@ class Player():
             mean=0.0,
             stddev = self.oup_stddev
         )*self.action_range
+        noise = tf.clip_by_value(
+            noise,
+            -hp.OUP_noise_max*self.action_range/2,
+            hp.OUP_noise_max*self.action_range/2,
+        )
         noised_action = action + noise
         noised_action = tf.clip_by_value(
             noised_action,

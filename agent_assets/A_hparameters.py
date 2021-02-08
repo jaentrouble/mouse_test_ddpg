@@ -48,7 +48,8 @@ OUP_damping = 0.15
 OUP_stddev_start=0.2
 OUP_stddev_end = 0.05
 OUP_stddev_nstep = 500000
-OUP_clip = 0.8
+# In range of [-1, 1]
+OUP_noise_max = 0.5
 
 IQN_ENABLE = True
 IQN_SUPPORT = 64

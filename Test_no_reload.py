@@ -71,6 +71,7 @@ hp.OUP_stddev_start = 0.2
 hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
+hp.OUP_noise_max = 0.5
 
 hp.IQN_ENABLE = True
 
