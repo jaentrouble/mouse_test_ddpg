@@ -71,7 +71,11 @@ hp.OUP_stddev_start = 0.2
 hp.OUP_stddev_end = 0.05
 hp.OUP_stddev_nstep = 2e5
 hp.OUP_stddev_nstep = int(hp.OUP_stddev_nstep)
+hp.OUP_noise_max = 0.5
 
+hp.IQN_ENABLE = True
+
+hp.ICM_ENABLE = True
 hp.ICM_intrinsic = 1.0
 
 hp.Target_update_tau = 1e-3
