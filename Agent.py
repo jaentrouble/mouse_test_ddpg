@@ -332,9 +332,9 @@ class Player():
             inverse_vars = self.models['inverse'].trainable_weights
             forward_vars = self.models['forward'].trainable_weights
 
-            concat_vars = encoder_vars + icm_loss + forward_vars
+            concat_vars = encoder_vars + inverse_vars + forward_vars
 
-            concat_gradients = icm_tape.gradient(inverse_loss, concat_vars)
+            concat_gradients = icm_tape.gradient(icm_loss, concat_vars)
             if self.mixed_float:
                 concat_gradients = self.models['inverse']\
                                     .optimizer\
