@@ -57,6 +57,7 @@ IQN_COS_EMBED = 64
 
 ICM_ENABLE = True
 ICM_intrinsic = 1.0
+ICM_loss_forward_weight = 0.2
 
 class _Buf():
     def __init__(self):

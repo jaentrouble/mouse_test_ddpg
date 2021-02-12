@@ -310,21 +310,34 @@ class Player():
 
         #################################################### ICM START
         if hp.ICM_ENABLE:
-            # Update Inverse
-            with tf.GradientTape() as inverse_tape:
+            with tf.GradientTape() as icm_tape:
                 f_s = self.models['encoder'](o, training=True)
                 f_sp = self.models['encoder'](sp_batch, training=True)
                 a_pred = self.models['inverse']([f_s, f_sp], training=True)
                 inverse_loss = tf.reduce_mean(tf.square(a_pred-a))
+
+                f_sp_pred = self.models['forward']([a, f_s])
+                # Leave batch axis
+                f_sp_flat = tf.reshape(f_sp,(batch_size, -1))
+                f_sp_pred_flat = tf.reshape(f_sp_pred,(batch_size, -1))
+                r_intrinsic = tf.losses.mse(f_sp_flat, f_sp_pred_flat)
+                forward_loss = tf.reduce_mean(r_intrinsic)
+
+                icm_loss = (1-hp.ICM_loss_forward_weight)*inverse_loss + \
+                           hp.ICM_loss_forward_weight * forward_loss
+
                 if self.mixed_float:
-                    inverse_loss = self.models['inverse']\
-                                    .optimizer\
-                                    .get_scaled_loss(inverse_loss)
+                    icm_loss = self.models['inverse']\
+                                   .optimizer\
+                                   .get_scaled_loss(icm_loss)
+
             encoder_vars = self.models['encoder'].trainable_weights
             inverse_vars = self.models['inverse'].trainable_weights
-            concat_vars = encoder_vars + inverse_vars
+            forward_vars = self.models['forward'].trainable_weights
 
-            concat_gradients = inverse_tape.gradient(inverse_loss, concat_vars)
+            concat_vars = encoder_vars + inverse_vars + forward_vars
+
+            concat_gradients = icm_tape.gradient(icm_loss, concat_vars)
             if self.mixed_float:
                 concat_gradients = self.models['inverse']\
                                     .optimizer\
@@ -334,33 +347,12 @@ class Player():
                 zip(concat_gradients[:len(encoder_vars)], encoder_vars)
             )
             self.models['inverse'].optimizer.apply_gradients(
-                zip(concat_gradients[len(encoder_vars):], inverse_vars)
+                zip(concat_gradients[len(encoder_vars):
+                                     len(encoder_vars)+len(inverse_vars)], 
+                                     inverse_vars)
             )
-
-            # Update forward with updated encoder
-            f_sp = self.models['encoder'](sp_batch, training=False)
-            with tf.GradientTape() as forward_tape:
-                f_s = self.models['encoder'](o, training=False)
-                f_sp_pred = self.models['forward']([a, f_s])
-                # Leave batch axis
-                f_sp_flat = tf.reshape(f_sp,(batch_size, -1))
-                f_sp_pred_flat = tf.reshape(f_sp_pred,(batch_size, -1))
-                r_intrinsic = tf.losses.mse(f_sp_flat, f_sp_pred_flat)
-                forward_loss = tf.reduce_mean(r_intrinsic)
-                if self.mixed_float:
-                    forward_loss = self.models['forward']\
-                                    .optimizer\
-                                    .get_scaled_loss(forward_loss)
-            forward_vars = self.models['forward'].trainable_weights
-            
-            forward_gradients = forward_tape.gradient(forward_loss, forward_vars)
-            if self.mixed_float:
-                forward_gradients = self.models['forward']\
-                                        .optimizer\
-                                        .get_unscaled_gradients(forward_gradients)
-            
             self.models['forward'].optimizer.apply_gradients(
-                zip(forward_gradients, forward_vars)
+                zip(concat_gradients[-len(forward_vars):], forward_vars)
             )
 
             r += hp.ICM_intrinsic * r_intrinsic
