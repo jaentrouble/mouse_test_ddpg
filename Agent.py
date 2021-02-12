@@ -337,7 +337,7 @@ class Player():
 
             concat_vars = encoder_vars + inverse_vars + forward_vars
 
-            concat_gradients = icm_tape.gradient(inverse_loss, concat_vars)
+            concat_gradients = icm_tape.gradient(icm_loss, concat_vars)
             if self.mixed_float:
                 concat_gradients = self.models['inverse']\
                                     .optimizer\
