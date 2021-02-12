@@ -77,6 +77,7 @@ hp.IQN_ENABLE = True
 
 hp.ICM_ENABLE = True
 hp.ICM_intrinsic = 1.0
+hp.ICM_loss_forward_weight = 0.2
 
 hp.Target_update_tau = 1e-3
 
