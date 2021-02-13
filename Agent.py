@@ -398,7 +398,7 @@ class Player():
                     training=True,
                 )
                 # For logging
-                q = tf.math.reduce_mean(support)
+                q = tf.math.reduce_mean(support, axis=-1)
                 # Shape (batch, support, support)
                 # One more final axis, because huber reduces one final axis
                 huber_loss = \
@@ -457,7 +457,7 @@ class Player():
 
         if self.total_steps % hp.log_per_steps==0:
             tf.summary.scalar('Critic Loss', critic_loss_original, self.total_steps)
-            tf.summary.scalar('q', q, self.total_steps)
+            tf.summary.scalar('MaxQ', tf.reduce_max(q), self.total_steps)
 
         critic_vars = self.models['critic'].trainable_weights
 
