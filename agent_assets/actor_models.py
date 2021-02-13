@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+from . import A_hparameters as hp
 """
 Actor models takes one input:
     1. encoded states
@@ -26,7 +27,7 @@ def actor_simple_dense(observation_space, action_space, encoder_f):
                      name='actor_dense2')(x)
     x = layers.Dense(64, activation='relu',
                      name='actor_dense3')(x)
-    x = layers.Dense(action_num, activation='tanh',
+    x = layers.Dense(action_num, activation=hp.Actor_activation,
                      name='actor_dense4',)(x)
     x = layers.Reshape(action_space.shape, name='actor_reshape')(x)
     outputs = x*action_range/2 + action_middle

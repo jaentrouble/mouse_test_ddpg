@@ -6,6 +6,8 @@ Target_update_tau = 1e-1
 Q_discount = 0.99
 Train_epoch = 1
 
+Actor_activation = 'tanh'
+
 class Lr():
     def __init__(self):
         self.start = None

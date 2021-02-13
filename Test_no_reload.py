@@ -22,6 +22,8 @@ env_kwargs = dict(
 
 model_f = am.unity_conv_ddpg
 
+hp.Actor_activation = 'linear'
+
 evaluate_f = tools.evaluate_unity
 
 parser = argparse.ArgumentParser()
