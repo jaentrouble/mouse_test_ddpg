@@ -22,7 +22,7 @@ env_kwargs = dict(
 
 model_f = am.unity_conv_ddpg
 
-hp.Actor_activation = 'linear'
+hp.Actor_activation = 'tanh'
 
 evaluate_f = tools.evaluate_unity
 
@@ -46,15 +46,15 @@ hp.Model_save = 30000
 hp.Learn_start = 20000
 
 hp.lr['actor'].halt_steps = 0
-hp.lr['actor'].start = 5e-6
-hp.lr['actor'].end = 5e-6
+hp.lr['actor'].start = 1e-5
+hp.lr['actor'].end = 1e-5
 hp.lr['actor'].nsteps = 1e6
 hp.lr['actor'].epsilon = 1e-3
 hp.lr['actor'].grad_clip = None
 
 hp.lr['critic'].halt_steps = 0
-hp.lr['critic'].start = 1e-5
-hp.lr['critic'].end = 1e-5
+hp.lr['critic'].start = 1e-4
+hp.lr['critic'].end = 1e-4
 hp.lr['critic'].nsteps = 1e6
 hp.lr['critic'].epsilon = 1e-3
 hp.lr['critic'].grad_clip = None
@@ -81,7 +81,7 @@ hp.ICM_ENABLE = False
 hp.ICM_intrinsic = 1.0
 hp.ICM_loss_forward_weight = 0.2
 
-hp.Target_update_tau = 1e-3
+hp.Target_update_tau = 1e-2
 
 hp.Buf.N = 1
 
